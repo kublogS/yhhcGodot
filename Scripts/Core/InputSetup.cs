@@ -23,6 +23,7 @@ public static class InputSetup
         Add("slot_down", Key.Down);
         Add("slot_select", Key.Enter);
         Add("slot_delete", Key.Delete);
+        Add("world_interact", Key.X);
     }
 
     private static void Add(string action, Key key)

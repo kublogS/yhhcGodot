@@ -21,6 +21,7 @@ config/icon="res://Assets/icons/icon.png"
 
 [autoload]
 
+ColorTheme="*res://Scripts/Autoload/ColorThemeService.cs"
 DisplaySettings="*res://Scripts/Autoload/DisplaySettingsService.cs"
 GameSession="*res://Scripts/Autoload/GameSession.cs"
 SaveService="*res://Scripts/Autoload/SaveService.cs"

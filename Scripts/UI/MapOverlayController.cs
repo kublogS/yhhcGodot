@@ -11,6 +11,7 @@ public partial class MapOverlayController : Control
 
     public override void _Ready()
     {
+        Theme = GameUiThemeFactory.GetOrCreate();
         _asciiPreview = GetNode<RichTextLabel>("AsciiPanel/AsciiPreview");
         BuildAsciiPreview();
     }
@@ -44,7 +45,7 @@ public partial class MapOverlayController : Control
             return;
         }
 
-        DrawRect(new Rect2(Vector2.Zero, Size), new Color(0, 0, 0, 0.65f), true);
+        DrawRect(new Rect2(Vector2.Zero, Size), PythonColorPalette.WithAlpha(PythonColorPalette.Black, 180), true);
         var mapScale = Mathf.Min((Size.X - 24) / _dungeon.Width, (Size.Y - 24) / _dungeon.Height);
         mapScale = Mathf.Clamp(mapScale, 4f, 24f);
         var offset = new Vector2((Size.X - _dungeon.Width * mapScale) * 0.5f, (Size.Y - _dungeon.Height * mapScale) * 0.5f);
@@ -61,9 +62,9 @@ public partial class MapOverlayController : Control
 
                 var color = tile switch
                 {
-                    TileType.Wall => new Color(0.22f, 0.22f, 0.22f),
-                    TileType.Exit => new Color(0.8f, 0.2f, 0.2f),
-                    _ => new Color(0.45f, 0.45f, 0.45f),
+                    TileType.Wall => PythonColorPalette.GrayDark,
+                    TileType.Exit => PythonColorPalette.Danger,
+                    _ => PythonColorPalette.Gray,
                 };
                 DrawRect(new Rect2(offset + new Vector2(x * mapScale, y * mapScale), new Vector2(mapScale, mapScale)), color, true);
             }
@@ -72,11 +73,11 @@ public partial class MapOverlayController : Control
         foreach (var enemy in _enemyPos)
         {
             var e = DungeonGenerator.WorldToGrid(enemy, DungeonBuilder.TileSize);
-            DrawCircle(offset + new Vector2((e.X + 0.5f) * mapScale, (e.Y + 0.5f) * mapScale), 3, new Color(1, 0.3f, 0.3f));
+            DrawCircle(offset + new Vector2((e.X + 0.5f) * mapScale, (e.Y + 0.5f) * mapScale), 3, PythonColorPalette.Danger);
         }
 
         var player = DungeonGenerator.WorldToGrid(_playerPos, DungeonBuilder.TileSize);
-        DrawCircle(offset + new Vector2((player.X + 0.5f) * mapScale, (player.Y + 0.5f) * mapScale), 4, new Color(0.9f, 0.9f, 1));
+        DrawCircle(offset + new Vector2((player.X + 0.5f) * mapScale, (player.Y + 0.5f) * mapScale), 4, PythonColorPalette.Title);
     }
 
     private void BuildAsciiPreview()

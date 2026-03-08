@@ -41,6 +41,11 @@ public sealed class SavedRuntime
     public string LastEncounterContext { get; set; } = "";
     public int DeepestFloor { get; set; }
     public int LabyrinthCompletions { get; set; }
+    public bool HasEnteredOverworld { get; set; }
+    public bool RunActive { get; set; }
+    public int ProceduralSeed { get; set; }
+    public int ProceduralFloor { get; set; }
+    public int ProceduralMaxFloors { get; set; } = 20;
 }
 
 public sealed class SaveFileData

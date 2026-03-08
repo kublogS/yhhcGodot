@@ -25,6 +25,11 @@ public partial class SaveService
             LastEncounterContext = session.LastEncounterContext,
             DeepestFloor = session.DeepestFloor,
             LabyrinthCompletions = session.LabyrinthCompletions,
+            HasEnteredOverworld = session.HasEnteredOverworld,
+            RunActive = session.RunActive,
+            ProceduralSeed = session.ProcSeed,
+            ProceduralFloor = session.ProcFloor,
+            ProceduralMaxFloors = session.ProcMaxFloors,
         };
     }
 
@@ -42,6 +47,11 @@ public partial class SaveService
         session.CurrentDungeon = RuntimeToDungeon(payload.Runtime.World);
         session.PlayerWorldPosition = new Vector3(payload.Runtime.World.PlayerX, payload.Runtime.World.PlayerY, payload.Runtime.World.PlayerZ);
         session.PlayerYawRadians = payload.Runtime.World.PlayerYaw;
+        session.HasEnteredOverworld = payload.Runtime.HasEnteredOverworld || session.CurrentDungeon is not null;
+        session.RunActive = payload.Runtime.RunActive;
+        session.ProcSeed = payload.Runtime.ProceduralSeed;
+        session.ProcFloor = payload.Runtime.ProceduralFloor;
+        session.ProcMaxFloors = Math.Max(1, payload.Runtime.ProceduralMaxFloors <= 0 ? 20 : payload.Runtime.ProceduralMaxFloors);
     }
 
     private static void EnsurePlayerMoves(GameState state)

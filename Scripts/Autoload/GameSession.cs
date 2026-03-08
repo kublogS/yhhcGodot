@@ -20,6 +20,11 @@ public partial class GameSession : Node
     public int PendingReplaceIndex { get; set; }
     public int DeepestFloor { get; set; }
     public int LabyrinthCompletions { get; set; }
+    public bool HasEnteredOverworld { get; set; }
+    public bool RunActive { get; set; }
+    public int ProcSeed { get; set; }
+    public int ProcFloor { get; set; }
+    public int ProcMaxFloors { get; set; } = 20;
 
     public override void _EnterTree()
     {
@@ -36,20 +41,14 @@ public partial class GameSession : Node
         State = GameState.New(playerName, (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         DeepestFloor = 1;
         LabyrinthCompletions = 0;
-        GenerateNewDungeon();
-    }
-
-    public void GenerateNewDungeon()
-    {
-        if (State is null)
-        {
-            return;
-        }
-
-        CurrentDungeon = DungeonGenerator.Generate(State.Rng);
-        PlayerWorldPosition = CurrentDungeon.PlayerSpawn + new Vector3(0, 1.2f, 0);
+        HasEnteredOverworld = false;
+        RunActive = false;
+        ProcSeed = 0;
+        ProcFloor = 0;
+        CurrentDungeon = null;
+        OverworldEnemies.Clear();
+        PlayerWorldPosition = Vector3.Zero;
         PlayerYawRadians = 0f;
-        OverworldEnemies = BuildOverworldEnemiesFromDungeon(CurrentDungeon, State.Rng);
     }
 
     public void StartEncounterWithEnemy(OverworldEnemyModel enemy, float reinforcementRadius = 10f)
@@ -111,31 +110,6 @@ public partial class GameSession : Node
         var before = State.Enemies.Count;
         State.AddEnemyToBattle(enemy);
         return State.Enemies.Count > before ? "active" : "queue";
-    }
-
-    private static List<OverworldEnemyModel> BuildOverworldEnemiesFromDungeon(DungeonData dungeon, GameRng rng)
-    {
-        var list = new List<OverworldEnemyModel>();
-        for (var i = 0; i < dungeon.EnemySpawns.Count; i++)
-        {
-            var spec = EnemyCatalog.Mobs[rng.NextInt(0, EnemyCatalog.Mobs.Count - 1)];
-            var spawn = dungeon.EnemySpawns[i];
-            list.Add(new OverworldEnemyModel
-            {
-                EnemyId = $"spawn_{i}",
-                Name = spec.Name,
-                SpecName = spec.Name,
-                Sprite = spec.Sprite,
-                X = spawn.X,
-                Y = spawn.Z,
-                Kind = spec.Kind,
-                BattleMult = 1f,
-                SpeedX = 1.4f + (float)rng.NextDouble(),
-                IntelligenceY = rng.NextInt(1, 8),
-            });
-        }
-
-        return list;
     }
 }
 

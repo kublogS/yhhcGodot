@@ -26,7 +26,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0745098, 0.0745098, 0.101961, 1)
+color = Color(0.109804, 0.14902, 0.219608, 1)
 mouse_filter = 2
 
 [node name="Shade" type="ColorRect" parent="."]
@@ -35,7 +35,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.38)
+color = Color(0, 0, 0, 0.705882)
 mouse_filter = 2
 
 [node name="Root" type="VBoxContainer" parent="."]

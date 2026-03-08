@@ -18,14 +18,20 @@ public partial class BattleController : Control
 
     public override void _Ready()
     {
+        Theme = GameUiThemeFactory.GetOrCreate();
         _flow = new BattleFlowCoordinator(GameSession.Instance);
         _log = GetNode<RichTextLabel>("Root/Log");
         _backdrop = GetNode<TextureRect>("Backdrop");
         _backdropFallback = GetNode<ColorRect>("BackdropFallback");
+        var shade = GetNode<ColorRect>("Shade");
         _playerName = GetNode<Label>("Root/Visuals/PlayerPanel/Box/PlayerName");
         _enemyName = GetNode<Label>("Root/Visuals/EnemyPanel/Box/EnemyName");
         _playerPortrait = GetNode<TextureRect>("Root/Visuals/PlayerPanel/Box/PlayerSprite");
         _enemyPortrait = GetNode<TextureRect>("Root/Visuals/EnemyPanel/Box/EnemySprite");
+        _backdropFallback.Color = PythonColorPalette.Black;
+        shade.Color = PythonColorPalette.OverlayBlack(180);
+        _playerName.Modulate = PythonColorPalette.Title;
+        _enemyName.Modulate = PythonColorPalette.Title;
 
         BindButtons();
         BindStaticAssets();
@@ -147,7 +153,7 @@ public partial class BattleController : Control
             var model = view.Targets[i];
             _targetButtons[i].Visible = model.Visible;
             _targetButtons[i].Text = model.Label;
-            _targetButtons[i].Modulate = model.Selected ? Colors.Yellow : Colors.White;
+            _targetButtons[i].Modulate = model.Selected ? PythonColorPalette.Title : PythonColorPalette.ButtonText;
         }
 
         RefreshPortraits();

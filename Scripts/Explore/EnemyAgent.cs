@@ -35,7 +35,7 @@ public partial class EnemyAgent : CharacterBody3D
             var body = new MeshInstance3D
             {
                 Mesh = new CapsuleMesh { Radius = 0.4f, Height = 1.2f },
-                MaterialOverride = new StandardMaterial3D { AlbedoColor = new Color(0.8f, 0.2f, 0.2f) },
+                MaterialOverride = new StandardMaterial3D { AlbedoColor = PythonColorPalette.Red },
             };
             AddChild(body);
         }

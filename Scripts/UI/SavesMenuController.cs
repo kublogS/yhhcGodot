@@ -3,6 +3,7 @@ using Godot;
 
 public partial class SavesMenuController : Control
 {
+    private Label _title = null!;
     private readonly List<Button> _slotButtons = new();
     private readonly List<Button> _deleteButtons = new();
     private SaveSlotFlowCoordinator _flow = null!;
@@ -10,7 +11,10 @@ public partial class SavesMenuController : Control
 
     public override void _Ready()
     {
+        Theme = GameUiThemeFactory.GetOrCreate();
         _flow = new SaveSlotFlowCoordinator(GameSession.Instance, SaveService.Instance);
+        _title = GetNode<Label>("Center/VBox/Title");
+        _title.Modulate = PythonColorPalette.SaveSlotTitle;
         BindButtons();
         Refresh();
         FocusCurrent();
@@ -70,6 +74,9 @@ public partial class SavesMenuController : Control
                 ? $"Slot {slot.SlotId} | {slot.CharacterName} | Floor {slot.DeepestFloor} | {slot.LastSaveText}"
                 : $"Slot {slot.SlotId} | Nuova partita";
             _deleteButtons[i].Disabled = !slot.IsUsed;
+            _slotButtons[i].Modulate = i == _index ? PythonColorPalette.Title : PythonColorPalette.Text;
+            _deleteButtons[i].Modulate = PythonColorPalette.Muted;
+            ApplySlotTheme(_slotButtons[i], slot.IsUsed, i == _index);
         }
     }
 
@@ -83,5 +90,33 @@ public partial class SavesMenuController : Control
     private void FocusCurrent()
     {
         _slotButtons[_index].GrabFocus();
+        Refresh();
+    }
+
+    private static void ApplySlotTheme(Button button, bool isUsed, bool isSelected)
+    {
+        var fill = isUsed ? PythonColorPalette.SaveSlotFill : PythonColorPalette.ButtonBg;
+        var border = isSelected ? PythonColorPalette.Title : PythonColorPalette.PanelBorder;
+        button.AddThemeStyleboxOverride("normal", BuildSlotStyle(fill, border, 1));
+        button.AddThemeStyleboxOverride("hover", BuildSlotStyle(fill, PythonColorPalette.Title, 2));
+        button.AddThemeStyleboxOverride("pressed", BuildSlotStyle(PythonColorPalette.Gray, PythonColorPalette.Title, 2));
+        button.AddThemeStyleboxOverride("focus", BuildSlotStyle(fill, PythonColorPalette.Title, 2));
+    }
+
+    private static StyleBoxFlat BuildSlotStyle(Color fill, Color border, int width)
+    {
+        return new StyleBoxFlat
+        {
+            BgColor = fill,
+            BorderColor = border,
+            BorderWidthTop = width,
+            BorderWidthBottom = width,
+            BorderWidthLeft = width,
+            BorderWidthRight = width,
+            CornerRadiusTopLeft = 8,
+            CornerRadiusTopRight = 8,
+            CornerRadiusBottomLeft = 8,
+            CornerRadiusBottomRight = 8,
+        };
     }
 }

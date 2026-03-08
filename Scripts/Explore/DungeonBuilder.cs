@@ -3,7 +3,7 @@ using Godot;
 public static class DungeonBuilder
 {
     public static float TileSize = 2.0f;
-    private const float WallHeight = 2.2f;
+    private const float WallHeight = 6.6f;
     private const float WallColliderInset = 0.24f;
 
     public static void Build(Node3D root, DungeonData dungeon)
@@ -11,15 +11,16 @@ public static class DungeonBuilder
         Clear(root);
         var floorMesh = new BoxMesh { Size = new Vector3(TileSize, 0.1f, TileSize) };
         var wallMesh = new BoxMesh { Size = new Vector3(TileSize, WallHeight, TileSize) };
-        var doorMesh = new BoxMesh { Size = new Vector3(TileSize, 1.7f, TileSize * 0.3f) };
         var wallShape = new BoxShape3D
         {
             Size = new Vector3(TileSize - (WallColliderInset * 2f), WallHeight, TileSize - (WallColliderInset * 2f)),
         };
 
-        var floorMaterial = MakeMaterial(new Color(0.25f, 0.28f, 0.25f));
-        var wallMaterial = MakeMaterial(new Color(0.55f, 0.55f, 0.58f));
-        var doorMaterial = MakeMaterial(new Color(0.45f, 0.31f, 0.18f));
+        var floorMaterial = MakeMaterial(PythonColorPalette.FloorLightGray);
+        var wallMaterial = MakeMaterial(PythonColorPalette.GrayLight);
+        var doorMaterial = MakeMaterial(PythonColorPalette.Door);
+        var exitMaterial = MakeMaterial(PythonColorPalette.WithAlpha(PythonColorPalette.Title, 205));
+        ((StandardMaterial3D)exitMaterial).Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
 
         for (var y = 0; y < dungeon.Height; y++)
         {
@@ -32,15 +33,19 @@ public static class DungeonBuilder
                     AddMesh(root, floorMesh, floorMaterial, pos + new Vector3(0f, -0.05f, 0f));
                 }
 
-                if (tile is TileType.Wall)
+                if (tile == TileType.Wall)
                 {
                     AddWall(root, wallMesh, wallMaterial, wallShape, pos + new Vector3(0f, WallHeight * 0.5f - 0.1f, 0f));
                     continue;
                 }
 
-                if (tile is TileType.Door)
+                if (tile == TileType.Door)
                 {
-                    AddMesh(root, doorMesh, doorMaterial, pos + new Vector3(0f, 0.85f, 0f));
+                    AddDoorway(root, dungeon, x, y, pos, doorMaterial);
+                }
+                else if (tile == TileType.Exit)
+                {
+                    AddExitMarker(root, pos, exitMaterial);
                 }
             }
         }
@@ -48,42 +53,51 @@ public static class DungeonBuilder
 
     private static StandardMaterial3D MakeMaterial(Color color)
     {
-        return new StandardMaterial3D
-        {
-            AlbedoColor = color,
-            Roughness = 1.0f,
-            Metallic = 0f,
-        };
+        return new StandardMaterial3D { AlbedoColor = color, Roughness = 1.0f, Metallic = 0f };
     }
 
     private static void AddMesh(Node3D root, Mesh mesh, Material material, Vector3 pos)
     {
-        var node = new MeshInstance3D
-        {
-            Mesh = mesh,
-            MaterialOverride = material,
-            Position = pos,
-        };
-        root.AddChild(node);
+        root.AddChild(new MeshInstance3D { Mesh = mesh, MaterialOverride = material, Position = pos });
     }
 
     private static void AddWall(Node3D root, Mesh mesh, Material material, Shape3D shape, Vector3 pos)
     {
-        var wall = new Node3D
-        {
-            Position = pos,
-        };
-
-        wall.AddChild(new MeshInstance3D
-        {
-            Mesh = mesh,
-            MaterialOverride = material,
-        });
-
+        var wall = new Node3D { Position = pos };
+        wall.AddChild(new MeshInstance3D { Mesh = mesh, MaterialOverride = material });
         var body = new StaticBody3D();
         body.AddChild(new CollisionShape3D { Shape = shape });
         wall.AddChild(body);
         root.AddChild(wall);
+    }
+
+    private static void AddDoorway(Node3D root, DungeonData dungeon, int x, int y, Vector3 pos, Material material)
+    {
+        var opensX = dungeon.IsWalkable(x - 1, y) && dungeon.IsWalkable(x + 1, y);
+        if (opensX)
+        {
+            AddDoorPart(root, material, new Vector3(0.18f, 2.8f, 0.24f), pos + new Vector3(-0.86f, 1.4f, 0f));
+            AddDoorPart(root, material, new Vector3(0.18f, 2.8f, 0.24f), pos + new Vector3(0.86f, 1.4f, 0f));
+            AddDoorPart(root, material, new Vector3(1.9f, 0.3f, 0.24f), pos + new Vector3(0f, 2.8f, 0f));
+            return;
+        }
+
+        AddDoorPart(root, material, new Vector3(0.24f, 2.8f, 0.18f), pos + new Vector3(0f, 1.4f, -0.86f));
+        AddDoorPart(root, material, new Vector3(0.24f, 2.8f, 0.18f), pos + new Vector3(0f, 1.4f, 0.86f));
+        AddDoorPart(root, material, new Vector3(0.24f, 0.3f, 1.9f), pos + new Vector3(0f, 2.8f, 0f));
+    }
+
+    private static void AddExitMarker(Node3D root, Vector3 pos, Material material)
+    {
+        AddDoorPart(root, material, new Vector3(0.18f, 2.4f, 0.18f), pos + new Vector3(-0.62f, 1.2f, 0f));
+        AddDoorPart(root, material, new Vector3(0.18f, 2.4f, 0.18f), pos + new Vector3(0.62f, 1.2f, 0f));
+        AddDoorPart(root, material, new Vector3(1.35f, 0.18f, 0.18f), pos + new Vector3(0f, 2.35f, 0f));
+        AddDoorPart(root, material, new Vector3(1.1f, 2.0f, 0.06f), pos + new Vector3(0f, 1.0f, -0.02f));
+    }
+
+    private static void AddDoorPart(Node3D root, Material material, Vector3 size, Vector3 position)
+    {
+        root.AddChild(new MeshInstance3D { Mesh = new BoxMesh { Size = size }, MaterialOverride = material, Position = position });
     }
 
     private static void Clear(Node3D root)
