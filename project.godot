@@ -1,0 +1,122 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
+[application]
+
+config/name="YouHaveToHaveCharacter_Godot"
+run/main_scene="res://Scenes/Boot.tscn"
+config/features=PackedStringArray("4.6", "C#", "Forward Plus")
+config/icon="res://Assets/icons/icon.png"
+
+[autoload]
+
+DisplaySettings="*res://Scripts/Autoload/DisplaySettingsService.cs"
+GameSession="*res://Scripts/Autoload/GameSession.cs"
+SaveService="*res://Scripts/Autoload/SaveService.cs"
+Database="*res://Scripts/Autoload/Database.cs"
+SceneRouter="*res://Scripts/Autoload/SceneRouter.cs"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[dotnet]
+
+project/assembly_name="YouHaveToHaveCharacter_Godot"
+
+[input]
+
+ui_accept={
+"deadzone": 0.2,
+"events": []
+}
+ui_cancel={
+"deadzone": 0.2,
+"events": []
+}
+move_forward={
+"deadzone": 0.2,
+"events": []
+}
+move_backward={
+"deadzone": 0.2,
+"events": []
+}
+move_left={
+"deadzone": 0.2,
+"events": []
+}
+move_right={
+"deadzone": 0.2,
+"events": []
+}
+look={
+"deadzone": 0.2,
+"events": []
+}
+menu_up={
+"deadzone": 0.2,
+"events": []
+}
+menu_down={
+"deadzone": 0.2,
+"events": []
+}
+battle_attack={
+"deadzone": 0.2,
+"events": []
+}
+battle_defend={
+"deadzone": 0.2,
+"events": []
+}
+battle_items={
+"deadzone": 0.2,
+"events": []
+}
+battle_flee={
+"deadzone": 0.2,
+"events": []
+}
+toggle_map={
+"deadzone": 0.2,
+"events": []
+}
+toggle_manual={
+"deadzone": 0.2,
+"events": []
+}
+toggle_pause={
+"deadzone": 0.2,
+"events": []
+}
+slot_up={
+"deadzone": 0.2,
+"events": []
+}
+slot_down={
+"deadzone": 0.2,
+"events": []
+}
+slot_select={
+"deadzone": 0.2,
+"events": []
+}
+slot_delete={
+"deadzone": 0.2,
+"events": []
+}

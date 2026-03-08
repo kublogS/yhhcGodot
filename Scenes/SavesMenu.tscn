@@ -1,0 +1,58 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/SavesMenuController.cs" id="1"]
+
+[node name="SavesMenu" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Center" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(960, 420)
+
+[node name="Title" type="Label" parent="Center/VBox"]
+text = "Seleziona Slot"
+horizontal_alignment = 1
+
+[node name="Slot1" type="HBoxContainer" parent="Center/VBox"]
+
+[node name="Select" type="Button" parent="Center/VBox/Slot1"]
+custom_minimum_size = Vector2(820, 44)
+text = "Slot 1"
+
+[node name="Delete" type="Button" parent="Center/VBox/Slot1"]
+custom_minimum_size = Vector2(120, 44)
+text = "Elimina"
+
+[node name="Slot2" type="HBoxContainer" parent="Center/VBox"]
+
+[node name="Select" type="Button" parent="Center/VBox/Slot2"]
+custom_minimum_size = Vector2(820, 44)
+text = "Slot 2"
+
+[node name="Delete" type="Button" parent="Center/VBox/Slot2"]
+custom_minimum_size = Vector2(120, 44)
+text = "Elimina"
+
+[node name="Slot3" type="HBoxContainer" parent="Center/VBox"]
+
+[node name="Select" type="Button" parent="Center/VBox/Slot3"]
+custom_minimum_size = Vector2(820, 44)
+text = "Slot 3"
+
+[node name="Delete" type="Button" parent="Center/VBox/Slot3"]
+custom_minimum_size = Vector2(120, 44)
+text = "Elimina"
+
+[node name="Back" type="Button" parent="Center"]
+text = "Indietro"

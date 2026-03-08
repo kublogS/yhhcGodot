@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/RewardController.cs" id="1"]
+
+[node name="Reward" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Root" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+
+[node name="Log" type="RichTextLabel" parent="Root"]
+custom_minimum_size = Vector2(0, 280)
+
+[node name="Buttons" type="HBoxContainer" parent="Root"]
+
+[node name="Move" type="Button" parent="Root/Buttons"]
+text = "Mossa"
+
+[node name="Money" type="Button" parent="Root/Buttons"]
+text = "Soldi"
+
+[node name="Items" type="Button" parent="Root/Buttons"]
+text = "Oggetti"
+
+[node name="Continue" type="Button" parent="Root/Buttons"]
+text = "Continua"

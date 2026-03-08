@@ -1,0 +1,40 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Explore/ExploreController.cs" id="1"]
+[ext_resource type="Script" path="res://Scripts/Explore/PlayerController.cs" id="2"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/HudOverlay.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/MapOverlay.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/ManualOverlay.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/PauseOverlay.tscn" id="6"]
+
+[sub_resource type="CapsuleShape3D" id="1"]
+radius = 0.4
+height = 1.7
+
+[node name="Explore" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+script = ExtResource("2")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("1")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+position = Vector3(0, 1.2, 0)
+current = true
+
+[node name="DungeonRoot" type="Node3D" parent="."]
+
+[node name="EnemiesRoot" type="Node3D" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HudOverlay" parent="CanvasLayer" instance=ExtResource("3")]
+
+[node name="MapOverlay" parent="CanvasLayer" instance=ExtResource("4")]
+
+[node name="ManualOverlay" parent="CanvasLayer" instance=ExtResource("5")]
+
+[node name="PauseOverlay" parent="CanvasLayer" instance=ExtResource("6")]

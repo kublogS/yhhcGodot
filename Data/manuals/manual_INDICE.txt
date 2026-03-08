@@ -1,0 +1,101 @@
+=== TITOLO: Benvenuto nell’Indice ===
+Questa stanza si chiama INDICE.
+Qui non ci sono nemici: è una zona sicura dove puoi prendere fiato e consultare le regole base.
+
+• La Porta RUN avvia una discesa nel Labirinto.
+• I riquadri sul muro contengono pagine di spiegazione come questa.
+
+Suggerimento: apri e chiudi questo manuale quando vuoi. Quando è aperto, gli altri HUD vengono nascosti.
+
+
+=== TITOLO: Cos’è una Run ===
+Una RUN è una “discesa” nel Labirinto.
+Quando attraversi la Porta RUN inizi una nuova run e il gioco genera i livelli uno alla volta.
+
+Durante una run puoi:
+• combattere, guadagnare EXP e soldi
+• ottenere oggetti
+• imparare mosse
+
+Ma tutto questo è legato SOLO alla run in corso.
+
+
+=== TITOLO: Reset quando torni all’Indice ===
+Quando torni all’INDICE, la run termina e si riparte da zero.
+
+Questo significa:
+• le tue statistiche tornano alle statistiche BASE
+• le mosse ottenute in run vengono rimosse
+• gli oggetti ottenuti in run vengono rimossi
+
+All’inizio di OGNI run riparti con:
+• 0 mosse (tranne ATTACCO, sempre disponibile)
+• 0 oggetti (tranne 3 medicine)
+
+Nota: esistono eccezioni/casi speciali, ma verranno introdotti più avanti.
+
+
+=== TITOLO: Porte e Progressione dei Livelli ===
+Ogni livello del Labirinto ha una PORTA di uscita.
+Attraversandola vai al livello successivo.
+
+• Il livello successivo viene generato al momento (on-demand).
+• La tua progressione della run continua (stats/EXP/oggetti/mosse della run rimangono).
+
+
+=== TITOLO: Risorse “meta” e risorse di Run ===
+Il gioco separa due tipi di progressione:
+
+1) Progressione di RUN
+• tutto ciò che guadagni durante la discesa
+• viene resettato quando torni all’Indice
+
+2) Progressione META (fuori run)
+• risorse che possono rimanere anche dopo il ritorno all’Indice
+• in questa versione potrebbe essere limitata o non ancora visibile
+
+Se una risorsa “rimane” fuori run, lo scoprirai tramite sistemi dedicati più avanti.
+
+
+=== TITOLO: Typing (concetto base) ===
+Ogni creatura e molte mosse hanno uno o più “TIPI” (typing).
+
+Il typing influenza:
+• danni inflitti e subiti
+• resistenze e vulnerabilità
+• alcune interazioni speciali
+
+In generale:
+• alcuni tipi sono forti contro altri
+• alcuni tipi resistono ad altri
+
+
+=== TITOLO: Tipi e vantaggi/svantaggi ===
+Quando attacchi, il tipo della tua mossa si confronta col tipo del bersaglio.
+
+Possibili esiti tipici:
+• Efficace: fai più danno
+• Neutro: danno normale
+• Resistente: fai meno danno
+• Inefficace: danno molto ridotto (o nullo se previsto)
+
+Se vedi messaggi di feedback (es. “Molto efficace!”), usali per imparare le combinazioni.
+
+
+=== TITOLO: Imparare e gestire le mosse ===
+Durante una run puoi ottenere nuove mosse.
+Le mosse ottenute:
+• sono valide SOLO nella run in corso
+• vengono rimosse tornando all’Indice
+
+“ATTACCO” è sempre disponibile: è la tua mossa base iniziale.
+
+Consiglio: prova combinazioni diverse in run diverse per capire cosa funziona meglio.
+
+
+=== TITOLO: Consigli rapidi ===
+• Nell’Indice: controlla le regole e preparati a scendere.
+• In run: sperimenta. Anche una run “corta” ti insegna qualcosa.
+• Se una strategia non funziona, cambia typing/mosse nella run successiva.
+
+Buona discesa.

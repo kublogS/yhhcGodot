@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/NameEntryController.cs" id="1"]
+
+[node name="NameEntry" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Center" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(480, 220)
+
+[node name="Title" type="Label" parent="Center/VBox"]
+text = "Nome Personaggio"
+horizontal_alignment = 1
+
+[node name="NameEdit" type="LineEdit" parent="Center/VBox"]
+placeholder_text = "Inserisci nome"
+max_length = 16
+
+[node name="StartButton" type="Button" parent="Center/VBox"]
+text = "Inizia"
+
+[node name="BackButton" type="Button" parent="Center/VBox"]
+text = "Indietro"

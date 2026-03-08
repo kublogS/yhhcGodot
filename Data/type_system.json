@@ -1,0 +1,110 @@
+{
+  "types": [
+    "Marziale",
+    "Sparo",
+    "Taglio",
+    "Fuoco",
+    "Acqua",
+    "Fulmine",
+    "Freddo",
+    "Vento",
+    "Cyber",
+    "Psicologico",
+    "Sacro",
+    "Profano"
+  ],
+  "families": {
+    "Bruta": [
+      "Marziale",
+      "Fuoco",
+      "Fulmine"
+    ],
+    "Cinetico": [
+      "Sparo",
+      "Vento",
+      "Cyber"
+    ],
+    "Spirito": [
+      "Taglio",
+      "Acqua",
+      "Psicologico"
+    ],
+    "Ultraterreno": [
+      "Freddo",
+      "Sacro",
+      "Profano"
+    ]
+  },
+  "weakness": {
+    "Marziale": [
+      "Sparo"
+    ],
+    "Sparo": [
+      "Taglio"
+    ],
+    "Taglio": [
+      "Marziale"
+    ],
+    "Fuoco": [
+      "Acqua"
+    ],
+    "Acqua": [
+      "Fulmine"
+    ],
+    "Fulmine": [
+      "Freddo"
+    ],
+    "Freddo": [
+      "Acqua"
+    ],
+    "Cyber": [
+      "Psicologico"
+    ],
+    "Psicologico": [
+      "Cyber"
+    ],
+    "Sacro": [
+      "Profano"
+    ],
+    "Profano": [
+      "Sacro"
+    ]
+  },
+  "friend_groups": [
+    [
+      "Bruta",
+      "Spirito"
+    ],
+    [
+      "Cinetico",
+      "Ultraterreno"
+    ]
+  ],
+  "damage_modifiers": {
+    "weakness_bonus": 0.5,
+    "same_family_penalty": -0.2,
+    "enemy_family_bonus": 0.2,
+    "stab_bonus": 0.2,
+    "crit_bonus": 0.5,
+    "disable_crit_on_weakness": true,
+    "nullify_on_same_type_as_defender": true
+  },
+  "type_stat_scaling": {
+    "Marziale": "attacco",
+    "Sparo": "attacco",
+    "Taglio": "attacco",
+    "Fuoco": "magia",
+    "Acqua": "magia",
+    "Vento": "magia",
+    "Freddo": "magia",
+    "Fulmine": "magia",
+    "Cyber": "intelligence",
+    "Psicologico": "intelligence",
+    "Sacro": "fede",
+    "Profano": "fede"
+  },
+  "scaling": {
+    "offense_per_stat_point": 0.01,
+    "defense_per_stat_point": 0.01
+  }
+}

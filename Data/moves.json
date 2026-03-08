@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "source": "Elenco 2f6d8063674280db92c2daef25c0a355.csv",
+  "moves": [
+    {
+      "id": 1,
+      "name": "Oi-zuki",
+      "weapon": "Marziale",
+      "type": null,
+      "base_damage": 30,
+      "aoe": false,
+      "cost": {
+        "resource": "Vita",
+        "raw": "10 HP",
+        "amount": 10,
+        "unit": "HP"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Smith & Wesson",
+      "weapon": "Sparo",
+      "type": null,
+      "base_damage": 30,
+      "aoe": false,
+      "cost": {
+        "resource": "Vita",
+        "raw": "10HP",
+        "amount": 10,
+        "unit": "HP"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Urumi",
+      "weapon": "Taglio",
+      "type": null,
+      "base_damage": 30,
+      "aoe": false,
+      "cost": {
+        "resource": "Vita",
+        "raw": "10HP",
+        "amount": 10,
+        "unit": "HP"
+      }
+    },
+    {
+      "id": 4,
+      "name": "jija",
+      "weapon": null,
+      "type": "Fuoco",
+      "base_damage": 15,
+      "aoe": false,
+      "cost": {
+        "resource": "Mana",
+        "raw": "4 MN",
+        "amount": 4,
+        "unit": "MN"
+      }
+    },
+    {
+      "id": 5,
+      "name": "jijii",
+      "weapon": null,
+      "type": "Acqua",
+      "base_damage": 15,
+      "aoe": false,
+      "cost": {
+        "resource": "Mana",
+        "raw": "4 MN",
+        "amount": 4,
+        "unit": "MN"
+      }
+    },
+    {
+      "id": 6,
+      "name": "pepò",
+      "weapon": null,
+      "type": "Vento",
+      "base_damage": 15,
+      "aoe": false,
+      "cost": {
+        "resource": "Mana",
+        "raw": "4 MN",
+        "amount": 4,
+        "unit": "MN"
+      }
+    },
+    {
+      "id": 7,
+      "name": "poodda",
+      "weapon": null,
+      "type": "Freddo",
+      "base_damage": 15,
+      "aoe": false,
+      "cost": {
+        "resource": "Mana",
+        "raw": "4 MN",
+        "amount": 4,
+        "unit": "MN"
+      }
+    },
+    {
+      "id": 8,
+      "name": "jàadi",
+      "weapon": null,
+      "type": "Fulmine",
+      "base_damage": 15,
+      "aoe": false,
+      "cost": {
+        "resource": "Mana",
+        "raw": "4 MN",
+        "amount": 4,
+        "unit": "MN"
+      }
+    },
+    {
+      "id": 9,
+      "name": "dijgeeda",
+      "weapon": null,
+      "type": "Cyber",
+      "base_damage": 15,
+      "aoe": false,
+      "cost": {
+        "resource": "Esperienza",
+        "raw": "8 EXP",
+        "amount": 8,
+        "unit": "EXP"
+      }
+    },
+    {
+      "id": 10,
+      "name": "muijo",
+      "weapon": null,
+      "type": "Psicologico",
+      "base_damage": 15,
+      "aoe": false,
+      "cost": {
+        "resource": "Esperienza",
+        "raw": "8 EXP",
+        "amount": 8,
+        "unit": "EXP"
+      }
+    },
+    {
+      "id": 11,
+      "name": "gilado",
+      "weapon": null,
+      "type": "Sacro",
+      "base_damage": 15,
+      "aoe": false,
+      "cost": {
+        "resource": "Vita",
+        "raw": "20 HP",
+        "amount": 20,
+        "unit": "HP"
+      }
+    },
+    {
+      "id": 12,
+      "name": "kintòou",
+      "weapon": null,
+      "type": "Profano",
+      "base_damage": 15,
+      "aoe": false,
+      "cost": {
+        "resource": "Vita",
+        "raw": "20 HP",
+        "amount": 20,
+        "unit": "HP"
+      }
+    },
+    {
+      "id": 13,
+      "name": "jijance",
+      "weapon": null,
+      "type": "Fuoco",
+      "base_damage": 15,
+      "aoe": true,
+      "cost": {
+        "resource": "Mana",
+        "raw": "8 MN",
+        "amount": 8,
+        "unit": "MN"
+      }
+    },
+    {
+      "id": 14,
+      "name": "jijiince",
+      "weapon": null,
+      "type": "Acqua",
+      "base_damage": 15,
+      "aoe": true,
+      "cost": {
+        "resource": "Mana",
+        "raw": "8 MN",
+        "amount": 8,
+        "unit": "MN"
+      }
+    },
+    {
+      "id": 15,
+      "name": "pepònce",
+      "weapon": null,
+      "type": "Vento",
+      "base_damage": 15,
+      "aoe": true,
+      "cost": {
+        "resource": "Mana",
+        "raw": "8 MN",
+        "amount": 8,
+        "unit": "MN"
+      }
+    },
+    {
+      "id": 16,
+      "name": "pooddance",
+      "weapon": null,
+      "type": "Freddo",
+      "base_damage": 15,
+      "aoe": true,
+      "cost": {
+        "resource": "Mana",
+        "raw": "8 MN",
+        "amount": 8,
+        "unit": "MN"
+      }
+    },
+    {
+      "id": 17,
+      "name": "dijgeedance",
+      "weapon": null,
+      "type": "Cyber",
+      "base_damage": 15,
+      "aoe": true,
+      "cost": {
+        "resource": "Esperienza",
+        "raw": "16 EXP",
+        "amount": 16,
+        "unit": "EXP"
+      }
+    },
+    {
+      "id": 18,
+      "name": "muijonce",
+      "weapon": null,
+      "type": "Psicologico",
+      "base_damage": 15,
+      "aoe": true,
+      "cost": {
+        "resource": "Esperienza",
+        "raw": "16 EXP",
+        "amount": 16,
+        "unit": "EXP"
+      }
+    },
+    {
+      "id": 19,
+      "name": "giladonce",
+      "weapon": null,
+      "type": "Sacro",
+      "base_damage": 15,
+      "aoe": true,
+      "cost": {
+        "resource": "Vita",
+        "raw": "40 HP",
+        "amount": 40,
+        "unit": "HP"
+      }
+    },
+    {
+      "id": 20,
+      "name": "kintòonce",
+      "weapon": null,
+      "type": "Profano",
+      "base_damage": 15,
+      "aoe": true,
+      "cost": {
+        "resource": "Vita",
+        "raw": "40 HP",
+        "amount": 40,
+        "unit": "HP"
+      }
+    },
+    {
+      "id": null,
+      "name": null,
+      "weapon": null,
+      "type": null,
+      "base_damage": 10,
+      "aoe": false,
+      "cost": {
+        "resource": null,
+        "raw": null,
+        "amount": null,
+        "unit": null
+      }
+    }
+  ]
+}
