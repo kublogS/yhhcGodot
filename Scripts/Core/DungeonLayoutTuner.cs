@@ -1,7 +1,14 @@
+using System.Collections.Generic;
 using Godot;
 
 public static class DungeonLayoutTuner
 {
+    private static readonly Vector2I[] Neighbor8 =
+    {
+        new(1, 0), new(-1, 0), new(0, 1), new(0, -1),
+        new(1, 1), new(-1, -1), new(1, -1), new(-1, 1),
+    };
+
     public static void EnsureComfortablePassages(DungeonData dungeon)
     {
         var source = dungeon.Grid;
@@ -17,13 +24,62 @@ public static class DungeonLayoutTuner
         dungeon.PlayerSpawn = SnapToNearestWalkable(dungeon, dungeon.PlayerSpawn);
     }
 
+    public static void EnsureWallEnvelope(DungeonData dungeon)
+    {
+        var grid = dungeon.Grid;
+        if (grid.GetLength(0) < 3 || grid.GetLength(1) < 3)
+        {
+            return;
+        }
+
+        var toWalls = new List<Vector2I>();
+        for (var y = 1; y < grid.GetLength(0) - 1; y++)
+        {
+            for (var x = 1; x < grid.GetLength(1) - 1; x++)
+            {
+                if (!IsWalkable(grid, x, y))
+                {
+                    continue;
+                }
+
+                foreach (var dir in Neighbor8)
+                {
+                    var nx = x + dir.X;
+                    var ny = y + dir.Y;
+                    if ((TileType)grid[ny, nx] == TileType.Void)
+                    {
+                        toWalls.Add(new Vector2I(nx, ny));
+                    }
+                }
+            }
+        }
+
+        foreach (var pos in toWalls)
+        {
+            grid[pos.Y, pos.X] = (int)TileType.Wall;
+        }
+
+        for (var x = 0; x < grid.GetLength(1); x++)
+        {
+            if ((TileType)grid[0, x] == TileType.Void) grid[0, x] = (int)TileType.Wall;
+            if ((TileType)grid[grid.GetLength(0) - 1, x] == TileType.Void) grid[grid.GetLength(0) - 1, x] = (int)TileType.Wall;
+        }
+
+        for (var y = 0; y < grid.GetLength(0); y++)
+        {
+            if ((TileType)grid[y, 0] == TileType.Void) grid[y, 0] = (int)TileType.Wall;
+            if ((TileType)grid[y, grid.GetLength(1) - 1] == TileType.Void) grid[y, grid.GetLength(1) - 1] = (int)TileType.Wall;
+        }
+    }
+
     private static void WidenDoors(int[,] source, int[,] target)
     {
         for (var y = 1; y < source.GetLength(0) - 1; y++)
         {
             for (var x = 1; x < source.GetLength(1) - 1; x++)
             {
-                if ((TileType)source[y, x] != TileType.Door)
+                var tile = (TileType)source[y, x];
+                if (tile is not (TileType.Doorway or TileType.Threshold))
                 {
                     continue;
                 }
@@ -95,7 +151,7 @@ public static class DungeonLayoutTuner
     private static bool IsWalkable(int[,] grid, int x, int y)
     {
         var tile = (TileType)grid[y, x];
-        return tile is TileType.Floor or TileType.Door or TileType.Exit or TileType.Breakable;
+        return tile is TileType.Floor or TileType.Doorway or TileType.Threshold or TileType.Exit or TileType.Breakable or TileType.Save;
     }
 
     private static bool IsWall(int[,] grid, int x, int y)

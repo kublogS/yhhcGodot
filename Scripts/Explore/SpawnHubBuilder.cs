@@ -7,8 +7,8 @@ public sealed class SpawnHubLayout
     public Vector3 PlayerSpawn { get; init; } = new(0f, 1.2f, -10f);
     public Vector3 PosterAnchor { get; init; } = new(0f, 2.1f, -15.45f);
     public Vector3 PosterNormal { get; init; } = Vector3.Back;
-    public Vector3 NorthDoorInteractPoint { get; init; } = new(0f, 1.2f, 13.5f);
-    public float NorthDoorInteractRadius { get; init; } = 2.4f;
+    public float PortalEntryMinZ { get; init; } = 0f;
+    public float PortalEntryHalfWidth { get; init; } = 1.8f;
 }
 
 public static class SpawnHubBuilder
@@ -27,8 +27,6 @@ public static class SpawnHubBuilder
         var floorColor = MakeMaterial(PythonColorPalette.FloorLightGray);
         var wallColor = MakeMaterial(PythonColorPalette.GrayDark);
         var doorColor = MakeMaterial(PythonColorPalette.Door);
-        var portalColor = MakeMaterial(PythonColorPalette.WithAlpha(PythonColorPalette.Gray, 190));
-        portalColor.Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
 
         var mapSize = GridSize * TileSize;
         var half = mapSize * 0.5f;
@@ -49,20 +47,22 @@ public static class SpawnHubBuilder
         var lintelY = (DoorClearHeight + (lintelHeight * 0.5f)) - (FloorThickness * 0.5f);
         AddSolid(root, new Vector3(DoorWidth, lintelHeight, WallThickness), new Vector3(0f, lintelY, northZ), wallColor);
 
-        AddVisual(root, new Vector3(DoorWidth - 0.35f, DoorClearHeight - 0.6f, 0.03f), new Vector3(0f, (DoorClearHeight * 0.5f) - 0.25f, northZ - 0.22f), portalColor);
-        AddVisual(root, new Vector3(0.24f, DoorClearHeight - 0.2f, 0.24f), new Vector3(-(DoorWidth * 0.5f) + 0.12f, (DoorClearHeight * 0.5f) - 0.1f, northZ - 0.1f), doorColor);
-        AddVisual(root, new Vector3(0.24f, DoorClearHeight - 0.2f, 0.24f), new Vector3((DoorWidth * 0.5f) - 0.12f, (DoorClearHeight * 0.5f) - 0.1f, northZ - 0.1f), doorColor);
-        AddVisual(root, new Vector3(DoorWidth, 0.24f, 0.24f), new Vector3(0f, DoorClearHeight - 0.12f, northZ - 0.1f), doorColor);
+        var portalSize = new Vector2(DoorWidth - 0.45f, DoorClearHeight - 0.55f);
+        var portalPosition = new Vector3(0f, (DoorClearHeight * 0.5f) - 0.22f, northZ - 0.2f);
+        AddPortal(root, portalSize, portalPosition);
+        AddVisual(root, new Vector3(0.24f, DoorClearHeight - 0.2f, WallThickness), new Vector3(-(DoorWidth * 0.5f) + 0.12f, (DoorClearHeight * 0.5f) - 0.1f, northZ), doorColor);
+        AddVisual(root, new Vector3(0.24f, DoorClearHeight - 0.2f, WallThickness), new Vector3((DoorWidth * 0.5f) - 0.12f, (DoorClearHeight * 0.5f) - 0.1f, northZ), doorColor);
+        AddVisual(root, new Vector3(DoorWidth, 0.24f, WallThickness), new Vector3(0f, DoorClearHeight - 0.12f, northZ), doorColor);
 
         return new SpawnHubLayout
         {
             WidthTiles = GridSize,
             HeightTiles = GridSize,
-            PlayerSpawn = new Vector3(0f, 1.2f, -half + (TileSize * 3f)),
+            PlayerSpawn = new Vector3(0f, 1.2f, TileSize * 2f),
             PosterAnchor = new Vector3(0f, 2.0f, -innerEdge + 0.22f),
             PosterNormal = Vector3.Back,
-            NorthDoorInteractPoint = new Vector3(0f, 1.2f, innerEdge - 1.7f),
-            NorthDoorInteractRadius = 2.5f,
+            PortalEntryMinZ = northZ - (WallThickness * 0.5f) + 0.03f,
+            PortalEntryHalfWidth = (DoorWidth * 0.5f) - 0.22f,
         };
     }
 
@@ -79,6 +79,13 @@ public static class SpawnHubBuilder
     private static void AddVisual(Node3D root, Vector3 size, Vector3 position, Material material)
     {
         root.AddChild(new MeshInstance3D { Mesh = new BoxMesh { Size = size }, Position = position, MaterialOverride = material });
+    }
+
+    private static void AddPortal(Node3D root, Vector2 size, Vector3 position)
+    {
+        var panel = PortalVisualFactory.Create(size);
+        panel.Position = position;
+        root.AddChild(panel);
     }
 
     private static StandardMaterial3D MakeMaterial(Color color)

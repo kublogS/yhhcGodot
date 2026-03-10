@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://c4jwbaki0bclf"]
+
+[sub_resource type="StandardMaterial3D" id="1"]
+albedo_color = Color(0.313726, 0.203922, 0.109804, 1)
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="4"]
+size = Vector3(0.08, 0.72, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="2"]
+albedo_color = Color(0.309804, 0.313726, 0.337255, 1)
+metallic = 0.15
+roughness = 0.82
+
+[sub_resource type="BoxMesh" id="5"]
+size = Vector3(0.14, 0.2, 0.14)
+
+[sub_resource type="StandardMaterial3D" id="3"]
+albedo_color = Color(1, 0.701961, 0.360784, 1)
+roughness = 0.6
+emission_enabled = true
+emission = Color(0.901961, 0.470588, 0.196078, 1)
+emission_energy_multiplier = 0.9
+
+[sub_resource type="BoxMesh" id="6"]
+size = Vector3(0.1, 0.14, 0.1)
+
+[node name="TorchPlaceholder" type="Node3D" unique_id=1486804997]
+
+[node name="Handle" type="MeshInstance3D" parent="." unique_id=1357388136]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36, 0)
+material_override = SubResource("1")
+mesh = SubResource("4")
+
+[node name="Head" type="MeshInstance3D" parent="." unique_id=1282805615]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.78, 0)
+material_override = SubResource("2")
+mesh = SubResource("5")
+
+[node name="Flame" type="MeshInstance3D" parent="." unique_id=277226779]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.94288814, 0)
+material_override = SubResource("3")
+mesh = SubResource("6")

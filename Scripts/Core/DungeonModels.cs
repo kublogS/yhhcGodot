@@ -6,9 +6,12 @@ public enum TileType
     Void = 0,
     Floor = 1,
     Wall = 2,
-    Door = 3,
+    Doorway = 3,
+    Door = Doorway,
     Breakable = 4,
     Exit = 5,
+    Threshold = 6,
+    Save = 7,
 }
 
 public sealed class DungeonData
@@ -17,10 +20,13 @@ public sealed class DungeonData
     public int[,] RoomIdGrid { get; set; } = new int[1, 1];
     public Dictionary<int, Rect2I> RoomBounds { get; set; } = new();
     public Dictionary<int, List<int>> RoomNeighbors { get; set; } = new();
+    public Dictionary<int, RoomBoundaryDescriptor> RoomBoundaryDescriptors { get; set; } = new();
     public Dictionary<int, int> RoomLevels { get; set; } = new();
     public HashSet<Vector2I> CorridorTiles { get; set; } = new();
     public HashSet<Vector2I> BreakableTiles { get; set; } = new();
     public HashSet<Vector2I> ExitTiles { get; set; } = new();
+    public HashSet<Vector2I> SaveTiles { get; set; } = new();
+    public HashSet<int> SaveRoomIds { get; set; } = new();
     public Vector3 PlayerSpawn { get; set; } = Vector3.Zero;
     public List<Vector3> EnemySpawns { get; set; } = new();
     public Vector3 FloorBossSpawn { get; set; } = Vector3.Zero;
@@ -30,6 +36,7 @@ public sealed class DungeonData
     public int FloorIndex { get; set; }
     public int StartRoomId { get; set; }
     public int BossRoomId { get; set; }
+    public bool LayoutTuned { get; set; }
 
     public int Width => Grid.GetLength(1);
     public int Height => Grid.GetLength(0);
@@ -62,6 +69,6 @@ public sealed class DungeonData
     public bool IsWalkable(int x, int y)
     {
         var tile = GetTile(x, y);
-        return tile is TileType.Floor or TileType.Door or TileType.Exit or TileType.Breakable;
+        return tile is TileType.Floor or TileType.Doorway or TileType.Threshold or TileType.Exit or TileType.Breakable or TileType.Save;
     }
 }

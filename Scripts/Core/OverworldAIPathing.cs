@@ -97,8 +97,10 @@ public static partial class OverworldAI
 
         var tile = (TileType)grid[y, x];
         return tile == TileType.Floor
-               || tile == TileType.Door
+               || tile == TileType.Doorway
+               || tile == TileType.Threshold
                || tile == TileType.Exit
-               || tile == TileType.Breakable;
+               || tile == TileType.Breakable
+               || tile == TileType.Save;
     }
 }

@@ -8,8 +8,14 @@ public static class InputSetup
         Add("move_backward", Key.S);
         Add("move_left", Key.A);
         Add("move_right", Key.D);
+
         Add("ui_accept", Key.Enter);
         Add("ui_cancel", Key.Escape);
+        Add("ui_up", Key.Up);
+        Add("ui_down", Key.Down);
+        Add("ui_left", Key.Left);
+        Add("ui_right", Key.Right);
+
         Add("menu_up", Key.Up);
         Add("menu_down", Key.Down);
         Add("battle_attack", Key.A);
@@ -23,6 +29,7 @@ public static class InputSetup
         Add("slot_down", Key.Down);
         Add("slot_select", Key.Enter);
         Add("slot_delete", Key.Delete);
+        Add("slot_copy", Key.C);
         Add("world_interact", Key.X);
     }
 

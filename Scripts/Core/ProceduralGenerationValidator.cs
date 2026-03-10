@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public static class ProceduralGenerationValidator
+public static partial class ProceduralGenerationValidator
 {
     public static List<string> ValidateGraph(ProcRoomGraph graph)
     {

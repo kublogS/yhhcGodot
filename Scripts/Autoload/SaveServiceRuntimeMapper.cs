@@ -6,12 +6,16 @@ public partial class SaveService
 {
     private static SavedRuntime BuildRuntimePayload(GameSession session)
     {
+        var inOverworld = IsInActiveOverworld(session);
         var world = new SavedWorld();
-        if (session.CurrentDungeon is not null)
+        if (inOverworld)
         {
-            world.Width = session.CurrentDungeon.Width;
-            world.Height = session.CurrentDungeon.Height;
-            world.GridFlat = FlattenGrid(session.CurrentDungeon.Grid);
+            var dungeon = session.CurrentDungeon!;
+            world.Width = dungeon.Width;
+            world.Height = dungeon.Height;
+            world.GridFlat = FlattenGrid(dungeon.Grid);
+            world.Seed = dungeon.Seed > 0 ? dungeon.Seed : session.ProcSeed;
+            world.FloorIndex = dungeon.FloorIndex;
             world.PlayerX = session.PlayerWorldPosition.X;
             world.PlayerY = session.PlayerWorldPosition.Y;
             world.PlayerZ = session.PlayerWorldPosition.Z;
@@ -21,14 +25,14 @@ public partial class SaveService
         return new SavedRuntime
         {
             World = world,
-            OverworldEnemies = session.OverworldEnemies,
+            OverworldEnemies = inOverworld ? new List<OverworldEnemyModel>(session.OverworldEnemies) : new List<OverworldEnemyModel>(),
             LastEncounterContext = session.LastEncounterContext,
             DeepestFloor = session.DeepestFloor,
             LabyrinthCompletions = session.LabyrinthCompletions,
-            HasEnteredOverworld = session.HasEnteredOverworld,
-            RunActive = session.RunActive,
-            ProceduralSeed = session.ProcSeed,
-            ProceduralFloor = session.ProcFloor,
+            HasEnteredOverworld = inOverworld,
+            RunActive = inOverworld,
+            ProceduralSeed = inOverworld ? (session.ProcSeed > 0 ? session.ProcSeed : world.Seed) : 0,
+            ProceduralFloor = inOverworld ? Math.Max(0, session.ProcFloor) : 0,
             ProceduralMaxFloors = session.ProcMaxFloors,
         };
     }
@@ -43,15 +47,26 @@ public partial class SaveService
         session.DeepestFloor = payload.Runtime.DeepestFloor;
         session.LabyrinthCompletions = payload.Runtime.LabyrinthCompletions;
         session.LastEncounterContext = payload.Runtime.LastEncounterContext;
+        session.ProcMaxFloors = Math.Max(1, payload.Runtime.ProceduralMaxFloors <= 0 ? 20 : payload.Runtime.ProceduralMaxFloors);
+
+        var loadedDungeon = RuntimeToDungeon(payload.Runtime.World);
+        var hasOverworldSnapshot = payload.Runtime.RunActive
+                                   && payload.Runtime.HasEnteredOverworld
+                                   && loadedDungeon is not null;
+        if (!hasOverworldSnapshot)
+        {
+            session.ReturnToSpawnHub();
+            return;
+        }
+
+        session.CurrentDungeon = loadedDungeon;
         session.OverworldEnemies = payload.Runtime.OverworldEnemies;
-        session.CurrentDungeon = RuntimeToDungeon(payload.Runtime.World);
         session.PlayerWorldPosition = new Vector3(payload.Runtime.World.PlayerX, payload.Runtime.World.PlayerY, payload.Runtime.World.PlayerZ);
         session.PlayerYawRadians = payload.Runtime.World.PlayerYaw;
-        session.HasEnteredOverworld = payload.Runtime.HasEnteredOverworld || session.CurrentDungeon is not null;
-        session.RunActive = payload.Runtime.RunActive;
-        session.ProcSeed = payload.Runtime.ProceduralSeed;
-        session.ProcFloor = payload.Runtime.ProceduralFloor;
-        session.ProcMaxFloors = Math.Max(1, payload.Runtime.ProceduralMaxFloors <= 0 ? 20 : payload.Runtime.ProceduralMaxFloors);
+        session.HasEnteredOverworld = true;
+        session.RunActive = true;
+        session.ProcSeed = payload.Runtime.ProceduralSeed > 0 ? payload.Runtime.ProceduralSeed : payload.Runtime.World.Seed;
+        session.ProcFloor = Math.Max(0, payload.Runtime.ProceduralFloor);
     }
 
     private static void EnsurePlayerMoves(GameState state)
@@ -84,12 +99,26 @@ public partial class SaveService
             }
         }
 
+        var roomIdGrid = new int[world.Height, world.Width];
+        for (var y = 0; y < world.Height; y++)
+        {
+            for (var x = 0; x < world.Width; x++)
+            {
+                roomIdGrid[y, x] = -1;
+            }
+        }
+
         var dungeon = new DungeonData
         {
             Grid = grid,
+            RoomIdGrid = roomIdGrid,
             PlayerSpawn = new Vector3(world.PlayerX, world.PlayerY, world.PlayerZ),
+            Seed = world.Seed,
+            FloorIndex = Math.Max(0, world.FloorIndex),
+            LayoutTuned = true,
         };
-        DungeonLayoutTuner.EnsureComfortablePassages(dungeon);
+        HydrateRuntimeSets(dungeon);
+        DungeonLayoutTuner.EnsureWallEnvelope(dungeon);
         return dungeon;
     }
 
@@ -105,5 +134,40 @@ public partial class SaveService
         }
 
         return list;
+    }
+
+    private static bool IsInActiveOverworld(GameSession session)
+    {
+        return session.RunActive
+               && session.HasEnteredOverworld
+               && session.CurrentDungeon is not null;
+    }
+
+    private static void HydrateRuntimeSets(DungeonData dungeon)
+    {
+        dungeon.BreakableTiles.Clear();
+        dungeon.ExitTiles.Clear();
+        dungeon.SaveTiles.Clear();
+        for (var y = 0; y < dungeon.Height; y++)
+        {
+            for (var x = 0; x < dungeon.Width; x++)
+            {
+                var tile = (TileType)dungeon.Grid[y, x];
+                if (tile == TileType.Breakable)
+                {
+                    dungeon.BreakableTiles.Add(new Vector2I(x, y));
+                }
+                else if (tile == TileType.Exit)
+                {
+                    var exit = new Vector2I(x, y);
+                    dungeon.ExitTiles.Add(exit);
+                    dungeon.ExitPosition = DungeonGenerator.GridToWorld(exit.X, exit.Y, DungeonBuilder.TileSize);
+                }
+                else if (tile == TileType.Save)
+                {
+                    dungeon.SaveTiles.Add(new Vector2I(x, y));
+                }
+            }
+        }
     }
 }

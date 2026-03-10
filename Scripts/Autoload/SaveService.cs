@@ -96,15 +96,56 @@ public partial class SaveService : Node
         return output;
     }
 
-    public void DeleteSlot(int slotId)
+    public bool DeleteSlot(int slotId)
     {
         if (!IsValidSlot(slotId))
         {
-            return;
+            return false;
         }
 
         EnsureSlotsExist();
+        var payload = SanitizePayload(ReadSlot(slotId), slotId);
+        if (!payload.Meta.IsUsed)
+        {
+            return false;
+        }
+
         AtomicWrite(SlotPath(slotId), JsonSerializer.Serialize(DefaultSlot(slotId), JsonOptions));
+        return true;
+    }
+
+    public SaveCopyResult CopySlot(int sourceSlotId, int targetSlotId, bool overwriteExisting)
+    {
+        if (!IsValidSlot(sourceSlotId) || !IsValidSlot(targetSlotId))
+        {
+            return SaveCopyResult.InvalidSlot;
+        }
+
+        if (sourceSlotId == targetSlotId)
+        {
+            return SaveCopyResult.SameSlot;
+        }
+
+        EnsureSlotsExist();
+        var source = SanitizePayload(ReadSlot(sourceSlotId), sourceSlotId);
+        if (!source.Meta.IsUsed || source.GameState is null)
+        {
+            return SaveCopyResult.SourceEmpty;
+        }
+
+        var target = SanitizePayload(ReadSlot(targetSlotId), targetSlotId);
+        if (target.Meta.IsUsed && !overwriteExisting)
+        {
+            return SaveCopyResult.TargetOccupied;
+        }
+
+        var clone = CloneToSlot(source, targetSlotId);
+        clone.Meta.IsUsed = true;
+        clone.Meta.SlotId = targetSlotId;
+        clone.Meta.SaveVersion = SaveVersion;
+        clone.Meta.LastSaveTs = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        AtomicWrite(SlotPath(targetSlotId), JsonSerializer.Serialize(clone, JsonOptions));
+        return SaveCopyResult.Success;
     }
 
     private static SaveFileData BuildSessionPayload(GameSession session, int slotId)
@@ -133,5 +174,12 @@ public partial class SaveService : Node
         return DateTimeOffset.FromUnixTimeSeconds(timestamp)
             .ToLocalTime()
             .ToString("yyyy-MM-dd HH:mm");
+    }
+
+    private static SaveFileData CloneToSlot(SaveFileData source, int slotId)
+    {
+        var json = JsonSerializer.Serialize(source, JsonOptions);
+        var clone = JsonSerializer.Deserialize<SaveFileData>(json, JsonOptions);
+        return SanitizePayload(clone, slotId);
     }
 }

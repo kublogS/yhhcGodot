@@ -38,100 +38,129 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.705882)
 mouse_filter = 2
 
-[node name="Root" type="VBoxContainer" parent="."]
+[node name="Root" type="MarginContainer" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
-theme_override_constants/separation = 10
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
 
-[node name="Visuals" type="HBoxContainer" parent="Root"]
-custom_minimum_size = Vector2(0, 245)
-theme_override_constants/separation = 18
-alignment = 1
+[node name="CombatRow" type="HBoxContainer" parent="Root"]
+size_flags_vertical = 3
+theme_override_constants/separation = 22
 
-[node name="PlayerPanel" type="PanelContainer" parent="Root/Visuals"]
+[node name="EnemyPanel" type="PanelContainer" parent="Root/CombatRow"]
+custom_minimum_size = Vector2(430, 0)
 size_flags_horizontal = 3
 
-[node name="Box" type="VBoxContainer" parent="Root/Visuals/PlayerPanel"]
+[node name="EnemyBox" type="VBoxContainer" parent="Root/CombatRow/EnemyPanel"]
 alignment = 1
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
 
-[node name="PlayerName" type="Label" parent="Root/Visuals/PlayerPanel/Box"]
-text = "Player"
-horizontal_alignment = 1
-
-[node name="PlayerSprite" type="TextureRect" parent="Root/Visuals/PlayerPanel/Box"]
-custom_minimum_size = Vector2(260, 200)
-expand_mode = 1
-stretch_mode = 5
-
-[node name="EnemyPanel" type="PanelContainer" parent="Root/Visuals"]
-size_flags_horizontal = 3
-
-[node name="Box" type="VBoxContainer" parent="Root/Visuals/EnemyPanel"]
-alignment = 1
-theme_override_constants/separation = 8
-
-[node name="EnemyName" type="Label" parent="Root/Visuals/EnemyPanel/Box"]
+[node name="EnemyName" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyBox"]
 text = "Enemy"
 horizontal_alignment = 1
 
-[node name="EnemySprite" type="TextureRect" parent="Root/Visuals/EnemyPanel/Box"]
-custom_minimum_size = Vector2(260, 200)
+[node name="EnemySprite" type="TextureRect" parent="Root/CombatRow/EnemyPanel/EnemyBox"]
+custom_minimum_size = Vector2(420, 300)
+size_flags_vertical = 3
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Log" type="RichTextLabel" parent="Root"]
-custom_minimum_size = Vector2(0, 155)
+[node name="HudPanel" type="PanelContainer" parent="Root/CombatRow"]
+custom_minimum_size = Vector2(510, 0)
+size_flags_horizontal = 3
+
+[node name="HudRoot" type="Control" parent="Root/CombatRow/HudPanel"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PaperGrain" type="TextureRect" parent="Root/CombatRow/HudPanel/HudRoot"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 0
+mouse_filter = 2
+
+[node name="Gloss" type="ColorRect" parent="Root/CombatRow/HudPanel/HudRoot"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 92.0
+grow_horizontal = 2
+color = Color(1, 0.992157, 0.960784, 0.14)
+mouse_filter = 2
+
+[node name="Hud" type="VBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Log" type="RichTextLabel" parent="Root/CombatRow/HudPanel/HudRoot/Hud"]
+custom_minimum_size = Vector2(0, 190)
 size_flags_vertical = 3
 
-[node name="Targets" type="HBoxContainer" parent="Root"]
+[node name="Targets" type="HBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud"]
 theme_override_constants/separation = 8
 
-[node name="Target1" type="Button" parent="Root/Targets"]
+[node name="Target1" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Targets"]
 text = "Enemy 1"
 
-[node name="Target2" type="Button" parent="Root/Targets"]
+[node name="Target2" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Targets"]
 text = "Enemy 2"
 
-[node name="Target3" type="Button" parent="Root/Targets"]
+[node name="Target3" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Targets"]
 text = "Enemy 3"
 
-[node name="Target4" type="Button" parent="Root/Targets"]
+[node name="Target4" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Targets"]
 text = "Enemy 4"
 
-[node name="Actions" type="VBoxContainer" parent="Root"]
+[node name="Actions" type="VBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud"]
+theme_override_constants/separation = 8
 
-[node name="Moves" type="HBoxContainer" parent="Root/Actions"]
+[node name="Moves" type="HBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions"]
+theme_override_constants/separation = 8
 
-[node name="Move0" type="Button" parent="Root/Actions/Moves"]
+[node name="Move0" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
 text = "1"
 
-[node name="Move1" type="Button" parent="Root/Actions/Moves"]
+[node name="Move1" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
 text = "2"
 
-[node name="Move2" type="Button" parent="Root/Actions/Moves"]
+[node name="Move2" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
 text = "3"
 
-[node name="Move3" type="Button" parent="Root/Actions/Moves"]
+[node name="Move3" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
 text = "4"
 
-[node name="Move4" type="Button" parent="Root/Actions/Moves"]
+[node name="Move4" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
 text = "5"
 
-[node name="ActionBar" type="HBoxContainer" parent="Root/Actions"]
+[node name="ActionBar" type="HBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions"]
+theme_override_constants/separation = 8
 
-[node name="Defend" type="Button" parent="Root/Actions"]
+[node name="Defend" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/ActionBar"]
 text = "Difenditi"
 
-[node name="Items" type="Button" parent="Root/Actions"]
+[node name="Items" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/ActionBar"]
 text = "Items"
 
-[node name="Flee" type="Button" parent="Root/Actions"]
+[node name="Flee" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/ActionBar"]
 text = "Fuga"

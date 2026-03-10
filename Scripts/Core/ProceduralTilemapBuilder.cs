@@ -13,9 +13,12 @@ public sealed partial class ProceduralTilemapBuilder
     private readonly Dictionary<int, Dictionary<char, Vector2I>> _doorSockets = new();
     private readonly Dictionary<int, int> _roomLevels = new();
     private readonly Dictionary<int, List<int>> _roomNeighbors = new();
+    private readonly Dictionary<int, RoomBoundaryDescriptor> _roomBoundaryDescriptors = new();
     private readonly HashSet<Vector2I> _corridorTiles = new();
     private readonly HashSet<Vector2I> _breakableTiles = new();
     private readonly HashSet<Vector2I> _exitTiles = new();
+    private readonly HashSet<Vector2I> _saveTiles = new();
+    private readonly HashSet<int> _saveRoomIds = new();
 
     private int[,] _grid = new int[1, 1];
     private int[,] _roomIdGrid = new int[1, 1];
@@ -23,12 +26,14 @@ public sealed partial class ProceduralTilemapBuilder
     private int _gridHeight;
     private int _maxRoomWidth;
     private int _maxRoomHeight;
+    private int _cellStepX;
+    private int _cellStepY;
 
     public ProceduralTilemapBuilder(ProcRoomGraph graph, ProcEmbedResult embed, int seed, int gap = 1)
     {
         _graph = graph;
         _embed = embed;
-        _gap = Math.Max(1, gap);
+        _gap = Math.Max(0, gap);
         _rng = new Random(seed);
     }
 
@@ -40,6 +45,8 @@ public sealed partial class ProceduralTilemapBuilder
         AddCorridorBranches();
         AddSecretRooms();
         AddExitTile();
+        AddSaveSanctuaries();
+        FinalizeTopology();
         return new ProcTilemapResult
         {
             Grid = _grid,
@@ -47,9 +54,12 @@ public sealed partial class ProceduralTilemapBuilder
             RoomBounds = _roomBounds,
             RoomLevels = _roomLevels,
             RoomNeighbors = _roomNeighbors,
+            RoomBoundaryDescriptors = _roomBoundaryDescriptors,
             CorridorTiles = _corridorTiles,
             BreakableTiles = _breakableTiles,
             ExitTiles = _exitTiles,
+            SaveTiles = _saveTiles,
+            SaveRoomIds = _saveRoomIds,
         };
     }
 
@@ -63,8 +73,10 @@ public sealed partial class ProceduralTilemapBuilder
             _maxRoomHeight = Math.Max(_maxRoomHeight, size.Y);
         }
 
-        _gridWidth = _embed.Width * _maxRoomWidth + ((_embed.Width - 1) * _gap);
-        _gridHeight = _embed.Height * _maxRoomHeight + ((_embed.Height - 1) * _gap);
+        _cellStepX = Math.Max(8, _maxRoomWidth - 3);
+        _cellStepY = Math.Max(6, _maxRoomHeight - 2);
+        _gridWidth = ((_embed.Width - 1) * _cellStepX) + _maxRoomWidth + 4 + _gap;
+        _gridHeight = ((_embed.Height - 1) * _cellStepY) + _maxRoomHeight + 4 + _gap;
         _grid = new int[_gridHeight, _gridWidth];
         _roomIdGrid = new int[_gridHeight, _gridWidth];
         for (var y = 0; y < _gridHeight; y++)
@@ -81,11 +93,17 @@ public sealed partial class ProceduralTilemapBuilder
         foreach (var (roomId, gridPos) in _embed.Positions)
         {
             var roomSize = _roomSizes[roomId];
-            var ox = gridPos.X * (_maxRoomWidth + _gap);
-            var oy = gridPos.Y * (_maxRoomHeight + _gap);
+            var roomType = _graph.Nodes[roomId].Type;
+            var profile = RoomShapeProfile.Create(_rng, roomType == ProcRoomType.Boss);
+            _roomBoundaryDescriptors[roomId] = profile.ToDescriptor(roomId);
+
+            var ox = 2 + (gridPos.X * _cellStepX) + _rng.Next(-1, 2);
+            var oy = 2 + (gridPos.Y * _cellStepY) + _rng.Next(-1, 2);
+            ox = Math.Clamp(ox, 1, _gridWidth - roomSize.X - 1);
+            oy = Math.Clamp(oy, 1, _gridHeight - roomSize.Y - 1);
             _roomBounds[roomId] = new Rect2I(ox, oy, roomSize.X, roomSize.Y);
-            _roomLevels[roomId] = (_graph.Nodes[roomId].Type == ProcRoomType.Boss || roomId % 7 == 0) ? 1 : 0;
-            var roomTiles = BuildRoomTiles(roomSize.X, roomSize.Y);
+            _roomLevels[roomId] = (roomType == ProcRoomType.Boss || roomId % 7 == 0) ? 1 : 0;
+            var roomTiles = RoomShapeMutator.BuildTiles(roomSize.X, roomSize.Y, _rng, profile);
             for (var y = 0; y < roomSize.Y; y++)
             {
                 for (var x = 0; x < roomSize.X; x++)
@@ -102,61 +120,21 @@ public sealed partial class ProceduralTilemapBuilder
                 ['W'] = new Vector2I(0, DoorOffset(roomSize.Y)),
                 ['E'] = new Vector2I(roomSize.X - 1, DoorOffset(roomSize.Y)),
             };
+            EnsureSocketInterior(roomId, ox, oy);
         }
     }
 
-    private int[,] BuildRoomTiles(int width, int height)
+    private void EnsureSocketInterior(int roomId, int ox, int oy)
     {
-        var tiles = new int[height, width];
-        for (var y = 0; y < height; y++)
+        foreach (var (dir, local) in _doorSockets[roomId])
         {
-            for (var x = 0; x < width; x++)
-            {
-                tiles[y, x] = (x == 0 || y == 0 || x == width - 1 || y == height - 1) ? (int)TileType.Wall : (int)TileType.Floor;
-            }
-        }
-
-        for (var i = 0; i < _rng.Next(1, 4); i++)
-        {
-            ApplyCutout(tiles, width, height);
-        }
-
-        for (var i = 0; i < _rng.Next(0, 4); i++)
-        {
-            tiles[_rng.Next(2, height - 2), _rng.Next(2, width - 2)] = (int)TileType.Wall;
-        }
-
-        return tiles;
-    }
-
-    private void ApplyCutout(int[,] tiles, int width, int height)
-    {
-        var side = _rng.Next(4);
-        var cutWidth = _rng.Next(2, 5);
-        var cutHeight = _rng.Next(2, 4);
-        if (side == 0 || side == 1)
-        {
-            var sx = _rng.Next(1, width - cutWidth - 1);
-            var startY = side == 0 ? 1 : height - cutHeight - 1;
-            for (var y = startY; y < startY + cutHeight; y++)
-            {
-                for (var x = sx; x < sx + cutWidth; x++)
-                {
-                    tiles[y, x] = (int)TileType.Wall;
-                }
-            }
-
-            return;
-        }
-
-        var sy = _rng.Next(1, height - cutHeight - 1);
-        var startX = side == 2 ? 1 : width - cutWidth - 1;
-        for (var y = sy; y < sy + cutHeight; y++)
-        {
-            for (var x = startX; x < startX + cutWidth; x++)
-            {
-                tiles[y, x] = (int)TileType.Wall;
-            }
+            var socket = new Vector2I(ox + local.X, oy + local.Y);
+            var inward = DirectionVector(Opposite(dir));
+            var insideA = socket + inward;
+            var insideB = insideA + inward;
+            if (InBounds(socket, 0)) _grid[socket.Y, socket.X] = (int)TileType.Wall;
+            if (InBounds(insideA, 0)) _grid[insideA.Y, insideA.X] = (int)TileType.Floor;
+            if (InBounds(insideB, 0) && _rng.NextDouble() < 0.55) _grid[insideB.Y, insideB.X] = (int)TileType.Floor;
         }
     }
 
@@ -166,5 +144,16 @@ public sealed partial class ProceduralTilemapBuilder
         if (roll < 0.4) return 2 + _rng.Next(0, 2);
         if (roll < 0.8) return length - 3 - _rng.Next(0, 2);
         return (length / 2) + _rng.Next(-1, 2);
+    }
+
+    private static Vector2I DirectionVector(char dir)
+    {
+        return dir switch
+        {
+            'N' => new Vector2I(0, -1),
+            'S' => new Vector2I(0, 1),
+            'W' => new Vector2I(-1, 0),
+            _ => new Vector2I(1, 0),
+        };
     }
 }

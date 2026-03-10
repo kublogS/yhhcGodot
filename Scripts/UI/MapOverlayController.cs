@@ -63,6 +63,9 @@ public partial class MapOverlayController : Control
                 var color = tile switch
                 {
                     TileType.Wall => PythonColorPalette.GrayDark,
+                    TileType.Doorway => PythonColorPalette.Door,
+                    TileType.Threshold => PythonColorPalette.Title,
+                    TileType.Save => new Color(0.92f, 0.95f, 1f, 1f),
                     TileType.Exit => PythonColorPalette.Danger,
                     _ => PythonColorPalette.Gray,
                 };

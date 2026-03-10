@@ -12,12 +12,12 @@ public sealed partial class ProceduralTilemapBuilder
         var branches = 0;
         foreach (var tile in corridorList)
         {
-            if (branches >= 8 || _rng.NextDouble() > 0.07)
+            if (branches >= 5 || _rng.NextDouble() > 0.035)
             {
                 continue;
             }
 
-            var len = _rng.Next(3, 7);
+            var len = _rng.Next(1, 4);
             var dirs = new[] { new Vector2I(1, 0), new Vector2I(-1, 0), new Vector2I(0, 1), new Vector2I(0, -1) };
             var dir = dirs[_rng.Next(dirs.Length)];
             var pos = tile;
@@ -118,6 +118,11 @@ public sealed partial class ProceduralTilemapBuilder
     private void CarveFloor(Vector2I pos)
     {
         if (!InBounds(pos, 1))
+        {
+            return;
+        }
+
+        if ((TileType)_grid[pos.Y, pos.X] == TileType.Exit)
         {
             return;
         }

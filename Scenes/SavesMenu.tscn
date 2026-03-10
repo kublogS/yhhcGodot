@@ -24,35 +24,61 @@ custom_minimum_size = Vector2(960, 420)
 text = "Seleziona Slot"
 horizontal_alignment = 1
 
+[node name="Status" type="Label" parent="Center/VBox"]
+text = " "
+horizontal_alignment = 1
+
 [node name="Slot1" type="HBoxContainer" parent="Center/VBox"]
 
 [node name="Select" type="Button" parent="Center/VBox/Slot1"]
-custom_minimum_size = Vector2(820, 44)
+custom_minimum_size = Vector2(700, 44)
 text = "Slot 1"
 
 [node name="Delete" type="Button" parent="Center/VBox/Slot1"]
 custom_minimum_size = Vector2(120, 44)
 text = "Elimina"
 
+[node name="Copy" type="Button" parent="Center/VBox/Slot1"]
+custom_minimum_size = Vector2(120, 44)
+text = "Duplica"
+
 [node name="Slot2" type="HBoxContainer" parent="Center/VBox"]
 
 [node name="Select" type="Button" parent="Center/VBox/Slot2"]
-custom_minimum_size = Vector2(820, 44)
+custom_minimum_size = Vector2(700, 44)
 text = "Slot 2"
 
 [node name="Delete" type="Button" parent="Center/VBox/Slot2"]
 custom_minimum_size = Vector2(120, 44)
 text = "Elimina"
 
+[node name="Copy" type="Button" parent="Center/VBox/Slot2"]
+custom_minimum_size = Vector2(120, 44)
+text = "Duplica"
+
 [node name="Slot3" type="HBoxContainer" parent="Center/VBox"]
 
 [node name="Select" type="Button" parent="Center/VBox/Slot3"]
-custom_minimum_size = Vector2(820, 44)
+custom_minimum_size = Vector2(700, 44)
 text = "Slot 3"
 
 [node name="Delete" type="Button" parent="Center/VBox/Slot3"]
 custom_minimum_size = Vector2(120, 44)
 text = "Elimina"
 
+[node name="Copy" type="Button" parent="Center/VBox/Slot3"]
+custom_minimum_size = Vector2(120, 44)
+text = "Duplica"
+
 [node name="Back" type="Button" parent="Center"]
 text = "Indietro"
+
+[node name="DeleteConfirm" type="ConfirmationDialog" parent="."]
+title = "Conferma eliminazione"
+ok_button_text = "Elimina"
+dialog_text = "Eliminare questo salvataggio?"
+
+[node name="OverwriteConfirm" type="ConfirmationDialog" parent="."]
+title = "Conferma sovrascrittura"
+ok_button_text = "Sovrascrivi"
+dialog_text = "Lo slot destinazione è occupato. Sovrascrivere?"

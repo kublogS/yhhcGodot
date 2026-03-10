@@ -8,6 +8,8 @@ public partial class HudOverlayController : Control
     private Label _mana = null!;
     private Label _soli = null!;
     private Label _enemies = null!;
+    private string? _statusOverride;
+    private ulong _statusUntilMs;
 
     public override void _Ready()
     {
@@ -18,12 +20,7 @@ public partial class HudOverlayController : Control
         _mana = GetNode<Label>("Panel/VBox/Mana");
         _soli = GetNode<Label>("Panel/VBox/Soli");
         _enemies = GetNode<Label>("Panel/VBox/Enemies");
-        _panel.Modulate = PythonColorPalette.WithAlpha(PythonColorPalette.HudBg, 220);
-        _name.Modulate = PythonColorPalette.Title;
-        _hp.Modulate = PythonColorPalette.Text;
-        _mana.Modulate = PythonColorPalette.Text;
-        _soli.Modulate = PythonColorPalette.Muted;
-        _enemies.Modulate = PythonColorPalette.Text;
+        ApplyReadableHudStyle();
     }
 
     public void UpdateFromState(CharacterModel player, int overworldEnemies)
@@ -32,6 +29,49 @@ public partial class HudOverlayController : Control
         _hp.Text = $"HP {player.Hp}/{player.MaxHp}";
         _mana.Text = $"Mana {player.Mana}/{player.MaxMana}";
         _soli.Text = $"Soli {player.Soli}";
-        _enemies.Text = $"Nemici area {overworldEnemies}";
+        if (_statusOverride is not null && Time.GetTicksMsec() < _statusUntilMs)
+        {
+            _enemies.Text = _statusOverride;
+        }
+        else
+        {
+            _statusOverride = null;
+            _enemies.Text = $"Nemici area {overworldEnemies}";
+        }
+    }
+
+    public void ShowTransientStatus(string message, float seconds = 2.4f)
+    {
+        _statusOverride = message;
+        _statusUntilMs = Time.GetTicksMsec() + (ulong)(Mathf.Max(0.2f, seconds) * 1000f);
+    }
+
+    private void ApplyReadableHudStyle()
+    {
+        var panelStyle = new StyleBoxFlat
+        {
+            BgColor = new Color(0.07f, 0.11f, 0.16f, 0.82f),
+            BorderColor = new Color(0.8f, 0.9f, 1f, 0.9f),
+            BorderWidthLeft = 2,
+            BorderWidthTop = 2,
+            BorderWidthRight = 2,
+            BorderWidthBottom = 2,
+            CornerRadiusTopLeft = 7,
+            CornerRadiusTopRight = 7,
+            CornerRadiusBottomLeft = 7,
+            CornerRadiusBottomRight = 7,
+            ShadowColor = new Color(0f, 0f, 0f, 0.36f),
+            ShadowSize = 5,
+        };
+        _panel.AddThemeStyleboxOverride("panel", panelStyle);
+        _panel.Modulate = Colors.White;
+
+        var bright = new Color(0.93f, 0.96f, 1f);
+        var accent = new Color(0.9f, 0.96f, 1f);
+        _name.Modulate = accent;
+        _hp.Modulate = bright;
+        _mana.Modulate = bright;
+        _soli.Modulate = new Color(0.82f, 0.9f, 0.98f);
+        _enemies.Modulate = bright;
     }
 }

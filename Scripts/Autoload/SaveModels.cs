@@ -23,6 +23,8 @@ public sealed class SavedWorld
     public int Width { get; set; }
     public int Height { get; set; }
     public List<int> GridFlat { get; set; } = new();
+    public int Seed { get; set; }
+    public int FloorIndex { get; set; }
     public float PlayerX { get; set; }
     public float PlayerY { get; set; }
     public float PlayerZ { get; set; }
@@ -65,4 +67,13 @@ public sealed class SaveSlotView
     public int DeepestFloor { get; init; }
     public int LabyrinthCompletions { get; init; }
     public string LastSaveText { get; init; } = "-";
+}
+
+public enum SaveCopyResult
+{
+    Success = 0,
+    InvalidSlot,
+    SameSlot,
+    SourceEmpty,
+    TargetOccupied,
 }

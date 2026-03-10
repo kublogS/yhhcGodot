@@ -11,8 +11,9 @@ public partial class ExploreController : Node3D
     private MapOverlayController _map = null!;
     private HudOverlayController _hud = null!;
     private Node3D _manualPanel = null!;
-    private Vector3 _spawnDoorInteractPoint = Vector3.Zero;
-    private float _spawnDoorInteractRadius = 2.5f;
+    private float _spawnPortalEntryMinZ;
+    private float _spawnPortalEntryHalfWidth = 1.8f;
+    private bool _spawnPortalTransitionLock;
     private bool _inSpawnHub;
 
     private readonly List<EnemyAgent> _enemyAgents = new();
@@ -26,6 +27,7 @@ public partial class ExploreController : Node3D
         _manual = GetNode<ManualOverlayController>("CanvasLayer/ManualOverlay");
         _map = GetNode<MapOverlayController>("CanvasLayer/MapOverlay");
         _hud = GetNode<HudOverlayController>("CanvasLayer/HudOverlay");
+        WirePauseOverlayActions();
         ExploreLightingRig.Ensure(this);
 
         if (GameSession.Instance.State is null)
@@ -59,9 +61,11 @@ public partial class ExploreController : Node3D
         GameSession.Instance.PlayerWorldPosition = _player.GlobalPosition;
         GameSession.Instance.PlayerYawRadians = _player.Rotation.Y;
         _hud.UpdateFromState(state.Player, _inSpawnHub ? 0 : GameSession.Instance.OverworldEnemies.Count);
+        ApplyInteractionInputLock();
 
         if (_inSpawnHub)
         {
+            HandleSpawnPortalCrossing();
             return;
         }
 
@@ -89,6 +93,7 @@ public partial class ExploreController : Node3D
 
             if (agent.GlobalPosition.DistanceTo(_player.GlobalPosition) < 1.2f)
             {
+                GameSession.Instance.TryCaptureBattleBackdrop(GetViewport(), "explore_runtime_snapshot");
                 GameSession.Instance.StartEncounterWithEnemy(agent.Model);
                 SceneRouter.Instance.GoToBattle();
                 return;
@@ -98,11 +103,18 @@ public partial class ExploreController : Node3D
 
     public override void _UnhandledInput(InputEvent @event)
     {
+        HandleLeftMouseInteraction(@event);
+
+        if (@event.IsActionPressed("ui_cancel") && HandleInteractionCancelRequest())
+        {
+            return;
+        }
+
         if (@event.IsActionPressed("toggle_pause"))
         {
             var open = !_pause.Visible;
             _pause.SetOverlayVisible(open);
-            _player.SetLookEnabled(!open);
+            ApplyInteractionInputLock();
         }
 
         if (@event.IsActionPressed("toggle_map"))
@@ -110,6 +122,7 @@ public partial class ExploreController : Node3D
             if (!_inSpawnHub)
             {
                 _map.Visible = !_map.Visible;
+                ApplyInteractionInputLock();
             }
         }
 
@@ -123,19 +136,12 @@ public partial class ExploreController : Node3D
             if (_manual.Visible)
             {
                 _manual.SetOpen(false);
-                _player.SetLookEnabled(!_pause.Visible);
+                ApplyInteractionInputLock();
             }
             else if (CanOpenManualFromPanel())
             {
-                _manual.SetOpen(true);
-                _player.SetLookEnabled(false);
+                OpenManualOverlay();
             }
-        }
-
-        if (@event.IsActionPressed("ui_cancel") && _pause.Visible)
-        {
-            _pause.SetOverlayVisible(false);
-            _player.SetLookEnabled(true);
         }
     }
 
@@ -145,7 +151,12 @@ public partial class ExploreController : Node3D
         var dungeon = session.CurrentDungeon!;
         _inSpawnHub = false;
         _exitTransitionLock = false;
-        DungeonLayoutTuner.EnsureComfortablePassages(dungeon);
+        if (!dungeon.LayoutTuned)
+        {
+            DungeonLayoutTuner.EnsureComfortablePassages(dungeon);
+            dungeon.LayoutTuned = true;
+        }
+        DungeonLayoutTuner.EnsureWallEnvelope(dungeon);
         DungeonBuilder.Build(_dungeonRoot, dungeon);
         _player.ConfigureDungeonNavigation(dungeon, DungeonBuilder.TileSize);
 
@@ -167,6 +178,9 @@ public partial class ExploreController : Node3D
         _map.Visible = false;
         _pause.Visible = false;
         CreateManualPanelFromDungeon(dungeon);
+        _player.SetTorchEnabled(true);
+        ExploreLightingRig.SetDungeonMood(this, true);
+        ApplyInteractionInputLock();
     }
 
     private bool CanOpenManualFromPanel()

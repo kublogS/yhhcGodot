@@ -64,7 +64,10 @@ public sealed class ProcTilemapResult
     public Dictionary<int, Rect2I> RoomBounds { get; init; } = new();
     public Dictionary<int, int> RoomLevels { get; init; } = new();
     public Dictionary<int, List<int>> RoomNeighbors { get; init; } = new();
+    public Dictionary<int, RoomBoundaryDescriptor> RoomBoundaryDescriptors { get; init; } = new();
     public HashSet<Vector2I> CorridorTiles { get; init; } = new();
     public HashSet<Vector2I> BreakableTiles { get; init; } = new();
     public HashSet<Vector2I> ExitTiles { get; init; } = new();
+    public HashSet<Vector2I> SaveTiles { get; init; } = new();
+    public HashSet<int> SaveRoomIds { get; init; } = new();
 }

@@ -57,6 +57,7 @@ public partial class GameSession
     {
         RunActive = false;
         HasEnteredOverworld = false;
+        ProcSeed = 0;
         ProcFloor = 0;
         CurrentDungeon = null;
         OverworldEnemies.Clear();

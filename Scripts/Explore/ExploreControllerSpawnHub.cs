@@ -6,20 +6,26 @@ public partial class ExploreController
     {
         _inSpawnHub = true;
         _exitTransitionLock = false;
+        GameSession.Instance.ReturnToSpawnHub();
         ClearNodeChildren(_enemiesRoot);
         _manualPanel?.QueueFree();
 
         var layout = SpawnHubBuilder.Build(_dungeonRoot);
-        _spawnDoorInteractPoint = layout.NorthDoorInteractPoint;
-        _spawnDoorInteractRadius = layout.NorthDoorInteractRadius;
+        _spawnPortalEntryMinZ = layout.PortalEntryMinZ;
+        _spawnPortalEntryHalfWidth = layout.PortalEntryHalfWidth;
+        _spawnPortalTransitionLock = false;
 
+        _player.ClearNavigation();
         _player.GlobalPosition = layout.PlayerSpawn;
         _player.Rotation = new Vector3(0f, 0f, 0f);
+        _player.SetTorchEnabled(false);
+        ExploreLightingRig.SetDungeonMood(this, false);
         _manual.LoadZone("INDICE");
         _manual.Visible = false;
         _map.Visible = false;
         _pause.Visible = false;
-        _manualPanel = ManualPosterBuilder.Build(_dungeonRoot, layout.PosterAnchor, layout.PosterNormal);
+        _manualPanel = ManualPosterBuilder.Build(_dungeonRoot, layout.PosterAnchor, layout.PosterNormal, scale: 1.45f);
+        ApplyInteractionInputLock();
     }
 
     private void CreateManualPanelFromDungeon(DungeonData dungeon)

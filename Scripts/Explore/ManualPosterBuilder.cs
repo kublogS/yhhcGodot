@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Godot;
 
 public static class ManualPosterBuilder
@@ -19,8 +18,9 @@ public static class ManualPosterBuilder
 
     private static readonly float[] SheetTilts = { 0.03f, -0.02f, 0.01f };
 
-    public static Node3D Build(Node3D parent, Vector3 anchorPosition, Vector3 wallNormal)
+    public static Node3D Build(Node3D parent, Vector3 anchorPosition, Vector3 wallNormal, float scale = 1f)
     {
+        var clampedScale = Mathf.Clamp(scale, 0.6f, 2.2f);
         var normal = wallNormal.LengthSquared() < 0.001f ? Vector3.Forward : wallNormal.Normalized();
         var root = new Node3D
         {
@@ -30,12 +30,14 @@ public static class ManualPosterBuilder
         };
         parent.AddChild(root);
 
-        var pages = ManualTextRepository.LoadZonePages("INDICE");
         for (var i = 0; i < SheetPositions.Length; i++)
         {
-            var page = i < pages.Count ? pages[i] : ("Manuale", "Apri con X o M per leggere tutte le pagine.");
-            AddSheet(root, SheetPositions[i], SheetSizes[i], SheetTilts[i], Shade(PythonColorPalette.ManualSheet, 0.9f + (i * 0.05f)));
-            AddSheetText(root, SheetPositions[i], SheetSizes[i], SheetTilts[i], page.Item1, ManualTextRepository.BuildExcerpt(page.Item2, 5, 28));
+            AddSheet(
+                root,
+                SheetPositions[i],
+                SheetSizes[i] * clampedScale,
+                SheetTilts[i],
+                Shade(PythonColorPalette.ManualSheet, 0.9f + (i * 0.05f)));
         }
 
         return root;
@@ -43,6 +45,13 @@ public static class ManualPosterBuilder
 
     private static void AddSheet(Node3D root, Vector3 localPosition, Vector2 size, float tilt, Color color)
     {
+        var node = new Node3D
+        {
+            Position = localPosition,
+            Rotation = new Vector3(tilt, 0f, 0f),
+        };
+        root.AddChild(node);
+
         var material = new StandardMaterial3D
         {
             AlbedoColor = color,
@@ -50,32 +59,19 @@ public static class ManualPosterBuilder
             Metallic = 0f,
         };
 
-        root.AddChild(new MeshInstance3D
+        node.AddChild(new MeshInstance3D
         {
             Mesh = new BoxMesh { Size = new Vector3(size.X, size.Y, 0.025f) },
             MaterialOverride = material,
-            Position = localPosition,
-            Rotation = new Vector3(tilt, 0f, 0f),
         });
-    }
 
-    private static void AddSheetText(Node3D root, Vector3 localPosition, Vector2 size, float tilt, string title, string excerpt)
-    {
-        var label = new Label3D
+        var body = new StaticBody3D();
+        body.AddToGroup(WorldInteractionGroups.ManualSheet);
+        body.AddChild(new CollisionShape3D
         {
-            Text = title + "\n\n" + excerpt,
-            FontSize = 18,
-            Modulate = PythonColorPalette.GrayDark,
-            OutlineSize = 1,
-            OutlineModulate = new Color(1f, 1f, 1f, 0.25f),
-            PixelSize = 0.0037f,
-            Position = localPosition + new Vector3(-(size.X * 0.43f), size.Y * 0.38f, 0.018f),
-            Rotation = new Vector3(tilt, 0f, 0f),
-            Width = size.X * 310f,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Top,
-        };
-        root.AddChild(label);
+            Shape = new BoxShape3D { Size = new Vector3(size.X, size.Y, 0.08f) },
+        });
+        node.AddChild(body);
     }
 
     private static Color Shade(Color color, float factor)

@@ -21,7 +21,7 @@ public static partial class DungeonGenerator
         var embed = ProceduralGraphEmbedder.Place(graph, EmbedSize, seed);
         LogValidationErrors("embed", ProceduralGenerationValidator.ValidateEmbedding(graph, embed));
 
-        var tilemap = new ProceduralTilemapBuilder(graph, embed, seed, gap: 1).Build();
+        var tilemap = new ProceduralTilemapBuilder(graph, embed, seed, gap: 0).Build();
         var startTile = RoomCenterTile(tilemap.RoomBounds[graph.StartId]);
         var bossTile = RoomCenterTile(tilemap.RoomBounds[graph.BossId]);
 
@@ -34,10 +34,13 @@ public static partial class DungeonGenerator
             RoomIdGrid = tilemap.RoomIdGrid,
             RoomBounds = tilemap.RoomBounds,
             RoomNeighbors = tilemap.RoomNeighbors,
+            RoomBoundaryDescriptors = tilemap.RoomBoundaryDescriptors,
             RoomLevels = tilemap.RoomLevels,
             CorridorTiles = tilemap.CorridorTiles,
             BreakableTiles = tilemap.BreakableTiles,
             ExitTiles = tilemap.ExitTiles,
+            SaveTiles = tilemap.SaveTiles,
+            SaveRoomIds = tilemap.SaveRoomIds,
             PlayerSpawn = GridToWorld(startTile.X, startTile.Y, DungeonBuilder.TileSize),
             EnemySpawns = enemySpawns,
             FloorBossSpawn = GridToWorld(bossTile.X, bossTile.Y, DungeonBuilder.TileSize),
@@ -50,6 +53,9 @@ public static partial class DungeonGenerator
         };
 
         DungeonLayoutTuner.EnsureComfortablePassages(dungeon);
+        DungeonLayoutTuner.EnsureWallEnvelope(dungeon);
+        dungeon.LayoutTuned = true;
+        LogValidationErrors("dungeon", ProceduralGenerationValidator.ValidateDungeon(graph, dungeon));
         dungeon.PlayerSpawn = SnapToWalkable(dungeon, dungeon.PlayerSpawn);
         return dungeon;
     }
@@ -93,7 +99,7 @@ public static partial class DungeonGenerator
                 var x = rng.Next(bounds.Position.X + 1, bounds.End.X - 1);
                 var y = rng.Next(bounds.Position.Y + 1, bounds.End.Y - 1);
                 var tile = (TileType)tilemap.Grid[y, x];
-                if (tile is not (TileType.Floor or TileType.Door) || Math.Abs(x - startTile.X) + Math.Abs(y - startTile.Y) <= 3)
+                if (tile is not (TileType.Floor or TileType.Doorway or TileType.Threshold) || Math.Abs(x - startTile.X) + Math.Abs(y - startTile.Y) <= 3)
                 {
                     continue;
                 }
