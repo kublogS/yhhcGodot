@@ -28,12 +28,13 @@ public static partial class Moves
 
     public static MoveModel BasicAttackMove()
     {
+        var basicPower = CombatBalanceConfig.BasicAttackBasePower;
         return new MoveModel
         {
             Name = "Attacco",
             MoveId = 0,
-            BaseDamage = 17,
-            Power = 17,
+            BaseDamage = basicPower,
+            Power = basicPower,
             CostAmount = 0,
             CostResource = null,
         };

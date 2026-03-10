@@ -5,6 +5,16 @@ public partial class BattleController
 {
     public override void _UnhandledInput(InputEvent @event)
     {
+        if (IsPlaybackLocked())
+        {
+            if (@event.IsPressed())
+            {
+                AcceptEvent();
+            }
+
+            return;
+        }
+
         if (HandleSecondaryPointerInput(@event))
         {
             AcceptEvent();

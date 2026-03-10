@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 public static partial class CombatService
@@ -10,14 +8,16 @@ public static partial class CombatService
         var player = state.Player;
         if (state.Enemies.Count == 0)
         {
-            outcome.LogLines.Add("Nessun nemico in campo.");
+            PushEvent(outcome, CombatEventType.SystemMessage, "Nessun nemico in campo.");
             return outcome;
         }
 
-        player.Defending = request.ActionType == CombatActionType.Defend;
+        var defendActivatedThisTurn = request.ActionType == CombatActionType.Defend;
+        player.Defending = defendActivatedThisTurn;
         if (request.ActionType == CombatActionType.Defend)
         {
-            outcome.LogLines.Add("Ti difendi: difesa +75% per questo turno.");
+            PushEvent(outcome, CombatEventType.ActionUsed, "Hai usato Difenditi.", sourceId: PlayerActorId);
+            PushEvent(outcome, CombatEventType.DefendActivated, "Ti difendi: difesa +75% per questa fase nemica.", sourceId: PlayerActorId);
         }
         else if (request.ActionType == CombatActionType.Items)
         {
@@ -25,15 +25,16 @@ public static partial class CombatService
         }
         else if (request.ActionType == CombatActionType.Flee)
         {
+            PushEvent(outcome, CombatEventType.ActionUsed, "Hai tentato la fuga.", sourceId: PlayerActorId);
             if (TryFlee(state))
             {
-                outcome.LogLines.Add("Fuga riuscita.");
+                PushEvent(outcome, CombatEventType.FleeSucceeded, "Fuga riuscita.", sourceId: PlayerActorId);
                 outcome.Fled = true;
                 outcome.BattleEnded = true;
                 return outcome;
             }
 
-            outcome.LogLines.Add("Fuga fallita!");
+            PushEvent(outcome, CombatEventType.FleeFailed, "Fuga fallita!", sourceId: PlayerActorId);
         }
         else
         {
@@ -44,7 +45,7 @@ public static partial class CombatService
         if (state.Enemies.Count == 0 && state.EnemyQueue.Count == 0)
         {
             outcome.BattleEnded = true;
-            player.Defending = false;
+            CleanupDefendState(player, outcome, defendActivatedThisTurn);
             return outcome;
         }
 
@@ -59,118 +60,24 @@ public static partial class CombatService
             if (!player.IsAlive)
             {
                 outcome.PlayerDefeated = true;
-                outcome.LogLines.Add("Sei stato sconfitto...");
+                PushEvent(outcome, CombatEventType.PlayerKnockedOut, "Sei stato sconfitto...", sourceId: EnemyActorId(enemy, state.Enemies.IndexOf(enemy)), targetId: PlayerActorId);
                 break;
             }
         }
 
-        player.Defending = false;
+        CleanupDefendState(player, outcome, defendActivatedThisTurn);
         HandleDeadEnemies(state, outcome);
         outcome.BattleEnded = state.Enemies.Count == 0 && state.EnemyQueue.Count == 0;
         return outcome;
     }
 
-    private static void RunEnemyTurn(CharacterModel enemy, GameState state, CombatTurnOutcome outcome)
+    private static void CleanupDefendState(CharacterModel player, CombatTurnOutcome outcome, bool defendActivatedThisTurn)
     {
-        var player = state.Player;
-        var enemyMove = PickCastableEnemyMove(enemy, state);
-        if (enemyMove is null)
+        if (defendActivatedThisTurn)
         {
-            var raw = RollAttack(enemy, player, state.Rng);
-            var dmg = player.Defending ? (int)MathF.Round(raw.RawDamage * 0.25f) : raw.RawDamage;
-            var dealt = player.TakeDamage(dmg);
-            outcome.LogLines.Add($"{enemy.Name} usa Attacco! Danno: {dealt} ({raw.Kind})");
-            return;
+            PushEvent(outcome, CombatEventType.DefendExpired, "La difesa termina a fine turno.", sourceId: PlayerActorId, targetId: PlayerActorId);
         }
 
-        ApplyMoveCost(enemy, enemyMove);
-        var defendingNeutral = player.Defending;
-        var (damage, tags) = ComputeMoveDamage(enemy, player, enemyMove, state.Rng, defendingNeutral);
-        if (player.Defending)
-        {
-            damage = (int)MathF.Round(damage * 0.25f);
-            tags.Crit = false;
-            tags.Weak = false;
-        }
-
-        var dealtMove = player.TakeDamage(damage);
-        var typeTag = tags.AttackType is null ? string.Empty : $" ({tags.AttackType})";
-        outcome.LogLines.Add($"{enemy.Name} usa {enemyMove.Name}{typeTag}! Danno: {dealtMove}{FormatTags(tags)}");
-    }
-
-    private static void HandleItems(CharacterModel player, CombatTurnRequest request, CombatTurnOutcome outcome)
-    {
-        var itemId = request.SelectedItemId;
-        if (string.IsNullOrWhiteSpace(itemId))
-        {
-            itemId = player.Inventory.Keys.FirstOrDefault(id => id.StartsWith("Cure", StringComparison.Ordinal));
-        }
-
-        var healed = string.IsNullOrWhiteSpace(itemId) ? 0 : Inventory.UseConsumable(player, itemId);
-        outcome.LogLines.Add(healed > 0 ? $"Hai usato {itemId}: +{healed} HP." : "Nessun oggetto disponibile.");
-    }
-
-    private static void HandlePlayerAttack(GameState state, CombatTurnRequest request, CombatTurnOutcome outcome)
-    {
-        var player = state.Player;
-        var move = request.SelectedMoveIndex >= 0 && request.SelectedMoveIndex < player.Moves.Count ? player.Moves[request.SelectedMoveIndex] : null;
-        move ??= Moves.BasicAttackMove();
-
-        if (!CanCastMove(player, move))
-        {
-            outcome.LogLines.Add("Risorse insufficienti.");
-            return;
-        }
-
-        ApplyMoveCost(player, move);
-        var targets = state.Enemies.Where(e => e.IsAlive).ToList();
-        if (targets.Count == 0)
-        {
-            return;
-        }
-
-        if (!move.Aoe)
-        {
-            var targetIndex = Math.Clamp(request.SelectedTargetIndex, 0, targets.Count - 1);
-            targets = new List<CharacterModel> { targets[targetIndex] };
-        }
-
-        foreach (var target in targets)
-        {
-            var (damage, tags) = ComputeMoveDamage(player, target, move, state.Rng);
-            var dealt = target.TakeDamage(damage);
-            var typeTag = tags.AttackType is null ? string.Empty : $" ({tags.AttackType})";
-            outcome.LogLines.Add($"Hai usato {move.Name}{typeTag} su {target.Name}! Danno: {dealt}{FormatTags(tags)}");
-        }
-    }
-
-    private static void HandleDeadEnemies(GameState state, CombatTurnOutcome outcome)
-    {
-        var dead = state.Enemies.Where(e => !e.IsAlive).ToList();
-        if (dead.Count == 0)
-        {
-            return;
-        }
-
-        state.Enemies = state.Enemies.Where(e => e.IsAlive).ToList();
-        Inventory.GrantBattleLoot(state, dead);
-        var gainedExp = dead.Sum(e => Math.Max(0, e.Exp));
-        if (gainedExp > 0)
-        {
-            state.Player.Exp += gainedExp;
-            outcome.LogLines.Add($"EXP +{gainedExp}");
-        }
-
-        outcome.DeadEnemies.AddRange(dead);
-        while (state.BattleHasCapacity() && state.EnemyQueue.Count > 0)
-        {
-            var next = state.EnemyQueue[0];
-            state.EnemyQueue.RemoveAt(0);
-            state.Enemies.Add(next);
-            outcome.EnteredEnemies.Add(next);
-            outcome.LogLines.Add("Un nemico entra in campo!");
-        }
-
-        state.SyncEnemyLegacy();
+        player.Defending = false;
     }
 }

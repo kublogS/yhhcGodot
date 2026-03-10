@@ -16,5 +16,6 @@ public sealed class BattleScreenState
 public sealed class BattleFlowResult
 {
     public List<string> LogLines { get; } = new();
+    public List<CombatEventEntry> Events { get; } = new();
     public SceneRoute Route { get; set; } = SceneRoute.None;
 }

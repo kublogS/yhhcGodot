@@ -39,7 +39,7 @@ public static partial class CombatService
 
     private static bool TryFlee(GameState state)
     {
-        if (state.Rng.NextDouble() > 0.7)
+        if (state.Rng.NextDouble() > CombatBalanceConfig.BaseFleeSuccessChance)
         {
             return false;
         }

@@ -15,16 +15,18 @@ public sealed class BattleFlowCoordinator
         var state = _session.State;
         if (state is null)
         {
+            AppendSystemEvent(result, "Sessione non valida: ritorno al menu principale.");
             result.Route = SceneRoute.MainMenu;
             return result;
         }
 
         var outcome = CombatService.CombatTurn(state, request);
         result.LogLines.AddRange(outcome.LogLines);
+        result.Events.AddRange(outcome.Events);
 
         if (outcome.PlayerDefeated)
         {
-            result.LogLines.Add("Game Over.");
+            AppendSystemEvent(result, "Game Over.");
             result.Route = SceneRoute.MainMenu;
             return result;
         }
@@ -38,7 +40,7 @@ public sealed class BattleFlowCoordinator
         if (outcome.BattleEnded)
         {
             var rewards = _session.FinalizeBattleRewards();
-            result.LogLines.Add($"Ricompense: Soli {rewards.Soli}, Oggetti {rewards.Items}, Mosse {rewards.Tokens}");
+            AppendSystemEvent(result, $"Ricompense: Soli {rewards.Soli}, Oggetti {rewards.Items}, Mosse {rewards.Tokens}");
             result.Route = SceneRoute.Reward;
             return result;
         }
@@ -85,5 +87,15 @@ public sealed class BattleFlowCoordinator
         }
 
         return new BattleScreenState { MoveLabels = moves, Targets = targets };
+    }
+
+    private static void AppendSystemEvent(BattleFlowResult result, string message)
+    {
+        result.LogLines.Add(message);
+        result.Events.Add(new CombatEventEntry
+        {
+            EventType = CombatEventType.SystemMessage,
+            Message = message,
+        });
     }
 }

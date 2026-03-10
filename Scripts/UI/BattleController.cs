@@ -17,6 +17,8 @@ public partial class BattleController : Control
     private PanelContainer _hudPanel = null!;
     private TextureRect _paperGrain = null!;
     private ColorRect _glossBand = null!;
+    private ColorRect _playerHitFlash = null!;
+    private ColorRect _enemyHitFlash = null!;
 
     public override void _Ready()
     {
@@ -33,6 +35,8 @@ public partial class BattleController : Control
         _hudPanel = GetNode<PanelContainer>("Root/CombatRow/HudPanel");
         _paperGrain = GetNode<TextureRect>("Root/CombatRow/HudPanel/HudRoot/PaperGrain");
         _glossBand = GetNode<ColorRect>("Root/CombatRow/HudPanel/HudRoot/Gloss");
+        _playerHitFlash = GetNode<ColorRect>("PlayerHitFlash");
+        _enemyHitFlash = GetNode<ColorRect>("Root/CombatRow/EnemyPanel/EnemyBox/EnemySprite/EnemyHitFlash");
 
         _backdropFallback.Color = PythonColorPalette.Black;
         shade.Color = PythonColorPalette.OverlayBlack(180);
@@ -42,25 +46,35 @@ public partial class BattleController : Control
         BindBackdrop();
         ConfigureHudPresentation();
         ConfigureNavigation();
+        ConfigureDamageFeedback();
         Refresh();
         FocusDefaultCommand();
     }
 
-    private void ExecuteTurn(CombatTurnRequest request)
+    private async void ExecuteTurn(CombatTurnRequest request)
     {
-        var result = _flow.ExecuteTurn(request);
-        foreach (var line in result.LogLines)
+        if (IsPlaybackLocked())
         {
-            AppendLog(line);
-        }
-
-        if (result.Route != SceneRoute.None)
-        {
-            SceneRouteNavigator.Navigate(result.Route, GetTree());
             return;
         }
 
-        Refresh();
+        SetPlaybackLock(true);
+        try
+        {
+            var result = _flow.ExecuteTurn(request);
+            await PlayEventSequence(result.Events, result.LogLines);
+            if (result.Route != SceneRoute.None)
+            {
+                SceneRouteNavigator.Navigate(result.Route, GetTree());
+                return;
+            }
+
+            Refresh();
+        }
+        finally
+        {
+            SetPlaybackLock(false);
+        }
     }
 
     private void Refresh()
@@ -96,6 +110,7 @@ public partial class BattleController : Control
             button.FocusMode = model.Visible ? Control.FocusModeEnum.All : Control.FocusModeEnum.None;
             button.Text = model.Label;
             button.Modulate = model.Selected ? PythonColorPalette.Title : PythonColorPalette.ButtonText;
+            button.SelfModulate = Colors.White;
         }
 
         RefreshEnemyVisual();

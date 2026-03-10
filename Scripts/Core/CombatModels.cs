@@ -36,6 +36,7 @@ public sealed class CombatTurnRequest
 public sealed class CombatTurnOutcome
 {
     public List<string> LogLines { get; set; } = new();
+    public List<CombatEventEntry> Events { get; set; } = new();
     public bool PlayerDefeated { get; set; }
     public bool BattleEnded { get; set; }
     public bool Fled { get; set; }

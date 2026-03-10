@@ -105,6 +105,8 @@
   },
   "scaling": {
     "offense_per_stat_point": 0.01,
-    "defense_per_stat_point": 0.01
+    "defense_per_stat_point": 0.01,
+    "base_flee_success_chance": 0.7,
+    "basic_attack_base_power": 17
   }
 }

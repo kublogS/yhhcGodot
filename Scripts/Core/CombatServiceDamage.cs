@@ -30,7 +30,7 @@ public static partial class CombatService
     {
         if (move.IsBasicAttack)
         {
-            return (17, new DamageTags());
+            return (CombatBalanceConfig.BasicAttackBasePower, new DamageTags());
         }
 
         var cfg = TypeSystem.GetConfig();
