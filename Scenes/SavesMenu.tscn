@@ -10,68 +10,223 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="Center"]
-custom_minimum_size = Vector2(960, 420)
+[node name="Fallback" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.415686, 0.529412, 0.454902, 1)
+mouse_filter = 2
 
-[node name="Title" type="Label" parent="Center/VBox"]
-text = "Seleziona Slot"
-horizontal_alignment = 1
+[node name="Tint" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.627451, 0.780392, 0.682353, 0.82)
+mouse_filter = 2
 
-[node name="Status" type="Label" parent="Center/VBox"]
+[node name="BottomShade" type="ColorRect" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -260.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.0431373, 0.0823529, 0.0588235, 0.66)
+mouse_filter = 2
+
+[node name="Layout" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 42
+theme_override_constants/margin_top = 34
+theme_override_constants/margin_right = 42
+theme_override_constants/margin_bottom = 30
+
+[node name="Root" type="VBoxContainer" parent="Layout"]
+theme_override_constants/separation = 18
+
+[node name="Head" type="VBoxContainer" parent="Layout/Root"]
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Layout/Root/Head"]
+text = "Seleziona salvataggio"
+theme_override_font_sizes/font_size = 52
+
+[node name="Status" type="Label" parent="Layout/Root/Head"]
 text = " "
-horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
 
-[node name="Slot1" type="HBoxContainer" parent="Center/VBox"]
+[node name="Cards" type="HBoxContainer" parent="Layout/Root"]
+size_flags_vertical = 3
+theme_override_constants/separation = 20
 
-[node name="Select" type="Button" parent="Center/VBox/Slot1"]
-custom_minimum_size = Vector2(700, 44)
-text = "Slot 1"
+[node name="Slot1Card" type="PanelContainer" parent="Layout/Root/Cards"]
+custom_minimum_size = Vector2(0, 320)
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="Delete" type="Button" parent="Center/VBox/Slot1"]
-custom_minimum_size = Vector2(120, 44)
+[node name="CardMargin" type="MarginContainer" parent="Layout/Root/Cards/Slot1Card"]
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Card" type="VBoxContainer" parent="Layout/Root/Cards/Slot1Card/CardMargin"]
+theme_override_constants/separation = 10
+
+[node name="SlotLabel" type="Label" parent="Layout/Root/Cards/Slot1Card/CardMargin/Card"]
+text = "SLOT 1"
+theme_override_font_sizes/font_size = 24
+
+[node name="InfoLabel" type="Label" parent="Layout/Root/Cards/Slot1Card/CardMargin/Card"]
+custom_minimum_size = Vector2(0, 72)
+text = "Nuova partita"
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+
+[node name="LastSaveLabel" type="Label" parent="Layout/Root/Cards/Slot1Card/CardMargin/Card"]
+custom_minimum_size = Vector2(0, 28)
+text = "Nessun salvataggio"
+autowrap_mode = 2
+vertical_alignment = 1
+
+[node name="Select" type="Button" parent="Layout/Root/Cards/Slot1Card/CardMargin/Card"]
+custom_minimum_size = Vector2(0, 48)
+text = "Nuova partita"
+
+[node name="Actions" type="HBoxContainer" parent="Layout/Root/Cards/Slot1Card/CardMargin/Card"]
+theme_override_constants/separation = 10
+
+[node name="Delete" type="Button" parent="Layout/Root/Cards/Slot1Card/CardMargin/Card/Actions"]
+size_flags_horizontal = 3
 text = "Elimina"
 
-[node name="Copy" type="Button" parent="Center/VBox/Slot1"]
-custom_minimum_size = Vector2(120, 44)
+[node name="Copy" type="Button" parent="Layout/Root/Cards/Slot1Card/CardMargin/Card/Actions"]
+size_flags_horizontal = 3
 text = "Duplica"
 
-[node name="Slot2" type="HBoxContainer" parent="Center/VBox"]
+[node name="Slot2Card" type="PanelContainer" parent="Layout/Root/Cards"]
+custom_minimum_size = Vector2(0, 320)
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="Select" type="Button" parent="Center/VBox/Slot2"]
-custom_minimum_size = Vector2(700, 44)
-text = "Slot 2"
+[node name="CardMargin" type="MarginContainer" parent="Layout/Root/Cards/Slot2Card"]
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
 
-[node name="Delete" type="Button" parent="Center/VBox/Slot2"]
-custom_minimum_size = Vector2(120, 44)
+[node name="Card" type="VBoxContainer" parent="Layout/Root/Cards/Slot2Card/CardMargin"]
+theme_override_constants/separation = 10
+
+[node name="SlotLabel" type="Label" parent="Layout/Root/Cards/Slot2Card/CardMargin/Card"]
+text = "SLOT 2"
+theme_override_font_sizes/font_size = 24
+
+[node name="InfoLabel" type="Label" parent="Layout/Root/Cards/Slot2Card/CardMargin/Card"]
+custom_minimum_size = Vector2(0, 72)
+text = "Nuova partita"
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+
+[node name="LastSaveLabel" type="Label" parent="Layout/Root/Cards/Slot2Card/CardMargin/Card"]
+custom_minimum_size = Vector2(0, 28)
+text = "Nessun salvataggio"
+autowrap_mode = 2
+vertical_alignment = 1
+
+[node name="Select" type="Button" parent="Layout/Root/Cards/Slot2Card/CardMargin/Card"]
+custom_minimum_size = Vector2(0, 48)
+text = "Nuova partita"
+
+[node name="Actions" type="HBoxContainer" parent="Layout/Root/Cards/Slot2Card/CardMargin/Card"]
+theme_override_constants/separation = 10
+
+[node name="Delete" type="Button" parent="Layout/Root/Cards/Slot2Card/CardMargin/Card/Actions"]
+size_flags_horizontal = 3
 text = "Elimina"
 
-[node name="Copy" type="Button" parent="Center/VBox/Slot2"]
-custom_minimum_size = Vector2(120, 44)
+[node name="Copy" type="Button" parent="Layout/Root/Cards/Slot2Card/CardMargin/Card/Actions"]
+size_flags_horizontal = 3
 text = "Duplica"
 
-[node name="Slot3" type="HBoxContainer" parent="Center/VBox"]
+[node name="Slot3Card" type="PanelContainer" parent="Layout/Root/Cards"]
+custom_minimum_size = Vector2(0, 320)
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="Select" type="Button" parent="Center/VBox/Slot3"]
-custom_minimum_size = Vector2(700, 44)
-text = "Slot 3"
+[node name="CardMargin" type="MarginContainer" parent="Layout/Root/Cards/Slot3Card"]
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
 
-[node name="Delete" type="Button" parent="Center/VBox/Slot3"]
-custom_minimum_size = Vector2(120, 44)
+[node name="Card" type="VBoxContainer" parent="Layout/Root/Cards/Slot3Card/CardMargin"]
+theme_override_constants/separation = 10
+
+[node name="SlotLabel" type="Label" parent="Layout/Root/Cards/Slot3Card/CardMargin/Card"]
+text = "SLOT 3"
+theme_override_font_sizes/font_size = 24
+
+[node name="InfoLabel" type="Label" parent="Layout/Root/Cards/Slot3Card/CardMargin/Card"]
+custom_minimum_size = Vector2(0, 72)
+text = "Nuova partita"
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+
+[node name="LastSaveLabel" type="Label" parent="Layout/Root/Cards/Slot3Card/CardMargin/Card"]
+custom_minimum_size = Vector2(0, 28)
+text = "Nessun salvataggio"
+autowrap_mode = 2
+vertical_alignment = 1
+
+[node name="Select" type="Button" parent="Layout/Root/Cards/Slot3Card/CardMargin/Card"]
+custom_minimum_size = Vector2(0, 48)
+text = "Nuova partita"
+
+[node name="Actions" type="HBoxContainer" parent="Layout/Root/Cards/Slot3Card/CardMargin/Card"]
+theme_override_constants/separation = 10
+
+[node name="Delete" type="Button" parent="Layout/Root/Cards/Slot3Card/CardMargin/Card/Actions"]
+size_flags_horizontal = 3
 text = "Elimina"
 
-[node name="Copy" type="Button" parent="Center/VBox/Slot3"]
-custom_minimum_size = Vector2(120, 44)
+[node name="Copy" type="Button" parent="Layout/Root/Cards/Slot3Card/CardMargin/Card/Actions"]
+size_flags_horizontal = 3
 text = "Duplica"
 
-[node name="Back" type="Button" parent="Center"]
+[node name="Bottom" type="HBoxContainer" parent="Layout/Root"]
+theme_override_constants/separation = 14
+
+[node name="Back" type="Button" parent="Layout/Root/Bottom"]
 text = "Indietro"
+
+[node name="Hints" type="Label" parent="Layout/Root/Bottom"]
+size_flags_horizontal = 3
+text = "Freccie: seleziona  •  Enter: apri slot  •  Del: elimina  •  C: duplica"
+horizontal_alignment = 2
 
 [node name="DeleteConfirm" type="ConfirmationDialog" parent="."]
 title = "Conferma eliminazione"

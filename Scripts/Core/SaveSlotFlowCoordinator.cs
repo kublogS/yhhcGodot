@@ -18,7 +18,12 @@ public sealed class SaveSlotFlowCoordinator
 
     public SceneRoute SelectSlotByIndex(int index)
     {
-        var slotId = index + 1;
+        var slotId = IndexToSlotId(index);
+        if (slotId <= 0)
+        {
+            return SceneRoute.SavesMenu;
+        }
+
         _session.CurrentSlot = slotId;
         if (_saveService.LoadFromSlot(slotId))
         {
@@ -48,6 +53,8 @@ public sealed class SaveSlotFlowCoordinator
 
     private static int IndexToSlotId(int index)
     {
-        return index is >= 0 and <= 2 ? index + 1 : -1;
+        return index >= 0 && index < SaveServiceSettings.SlotIds.Length
+            ? SaveServiceSettings.SlotIds[index]
+            : -1;
     }
 }

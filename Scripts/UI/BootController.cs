@@ -12,21 +12,16 @@ public partial class BootController : Node
     {
         try
         {
-            if (Database.Instance is not null)
-            {
-                Database.Instance.LoadAll();
-            }
+            var database = GetNodeOrNull<Database>("/root/Database");
+            database?.LoadAll();
 
-            if (SaveService.Instance is not null)
-            {
-                SaveService.Instance.EnsureSlotsExist();
-            }
+            var saveService = GetNodeOrNull<SaveService>("/root/SaveService");
+            saveService?.EnsureSlotsExist();
 
-            CombatDebugTest.Run();
-
-            if (SceneRouter.Instance is not null)
+            var sceneRouter = GetNodeOrNull<SceneRouter>("/root/SceneRouter");
+            if (sceneRouter is not null)
             {
-                SceneRouter.Instance.GoToMainMenu();
+                sceneRouter.GoToMainMenu();
                 return;
             }
 
