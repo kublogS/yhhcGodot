@@ -41,11 +41,11 @@ public static partial class DungeonGenerator
             ExitTiles = tilemap.ExitTiles,
             SaveTiles = tilemap.SaveTiles,
             SaveRoomIds = tilemap.SaveRoomIds,
-            PlayerSpawn = GridToWorld(startTile.X, startTile.Y, DungeonBuilder.TileSize),
+            PlayerSpawn = GridToWorld(startTile.X, startTile.Y, DungeonMetrics.TileSize),
             EnemySpawns = enemySpawns,
-            FloorBossSpawn = GridToWorld(bossTile.X, bossTile.Y, DungeonBuilder.TileSize),
+            FloorBossSpawn = GridToWorld(bossTile.X, bossTile.Y, DungeonMetrics.TileSize),
             HasFloorBossSpawn = true,
-            ExitPosition = GridToWorld(bossTile.X, bossTile.Y, DungeonBuilder.TileSize),
+            ExitPosition = GridToWorld(bossTile.X, bossTile.Y, DungeonMetrics.TileSize),
             Seed = seed,
             FloorIndex = floorIndex,
             StartRoomId = graph.StartId,
@@ -62,12 +62,12 @@ public static partial class DungeonGenerator
 
     public static Vector2I WorldToGrid(Vector3 worldPos, float tileSize = 2f)
     {
-        return new Vector2I((int)MathF.Round(worldPos.X / tileSize), (int)MathF.Round(worldPos.Z / tileSize));
+        return DungeonMetrics.WorldToGrid(worldPos, tileSize);
     }
 
     public static Vector3 GridToWorld(int x, int y, float tileSize = 2f)
     {
-        return new Vector3(x * tileSize, 0.0f, y * tileSize);
+        return DungeonMetrics.GridToWorld(x, y, tileSize);
     }
 
     private static Vector2I RoomCenterTile(Rect2I room)
@@ -104,7 +104,7 @@ public static partial class DungeonGenerator
                     continue;
                 }
 
-                spawns.Add(GridToWorld(x, y, DungeonBuilder.TileSize));
+                spawns.Add(GridToWorld(x, y, DungeonMetrics.TileSize));
             }
         }
 
@@ -113,7 +113,7 @@ public static partial class DungeonGenerator
 
     private static Vector3 SnapToWalkable(DungeonData dungeon, Vector3 world)
     {
-        var grid = WorldToGrid(world, DungeonBuilder.TileSize);
+        var grid = WorldToGrid(world, DungeonMetrics.TileSize);
         if (dungeon.IsWalkable(grid.X, grid.Y))
         {
             return world;
@@ -127,7 +127,7 @@ public static partial class DungeonGenerator
                 {
                     if (dungeon.IsWalkable(grid.X + x, grid.Y + y))
                     {
-                        return GridToWorld(grid.X + x, grid.Y + y, DungeonBuilder.TileSize);
+                        return GridToWorld(grid.X + x, grid.Y + y, DungeonMetrics.TileSize);
                     }
                 }
             }

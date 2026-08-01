@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 public static partial class CombatService
 {
-    private const string PlayerActorId = "player";
+    internal const string PlayerActorId = "player";
 
-    private static void PushEvent(
+    internal static void PushEvent(
         CombatTurnOutcome outcome,
         CombatEventType type,
         string message,
@@ -29,8 +29,13 @@ public static partial class CombatService
         });
     }
 
-    private static string EnemyActorId(CharacterModel enemy, int slot)
+    internal static string EnemyActorId(CharacterModel enemy, int slot)
     {
+        if (!string.IsNullOrWhiteSpace(enemy.BattleActorId))
+        {
+            return enemy.BattleActorId;
+        }
+
         return $"enemy:{slot}:{enemy.Name}";
     }
 }

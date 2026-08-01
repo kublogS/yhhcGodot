@@ -10,7 +10,6 @@ public static class CombatDebugTest
             EnemyCatalog.EnemyFromSpec(EnemyCatalog.Mobs[0], state.Rng, 1f, string.Empty, "Mob"),
             EnemyCatalog.EnemyFromSpec(EnemyCatalog.Mobs[1], state.Rng, 1f, string.Empty, "Mob"),
         };
-        state.SyncEnemyLegacy();
 
         var turn = CombatService.CombatTurn(state, new CombatTurnRequest
         {

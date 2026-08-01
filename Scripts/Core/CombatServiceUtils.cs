@@ -4,13 +4,13 @@ using System.Linq;
 
 public static partial class CombatService
 {
-    private static MoveModel? PickCastableEnemyMove(CharacterModel enemy, GameState state)
+    internal static MoveModel? PickCastableEnemyMove(CharacterModel enemy, GameState state)
     {
         var usable = enemy.Moves.Where(m => m is not null && CanCastMove(enemy, m!)).ToList();
         return usable.Count == 0 ? null : usable[state.Rng.NextInt(0, usable.Count - 1)];
     }
 
-    private static bool CanCastMove(CharacterModel owner, MoveModel move)
+    internal static bool CanCastMove(CharacterModel owner, MoveModel move)
     {
         var amount = move.CostAmount ?? 0;
         var category = (move.CostResource ?? string.Empty).ToLowerInvariant();
@@ -23,7 +23,7 @@ public static partial class CombatService
         };
     }
 
-    private static void ApplyMoveCost(CharacterModel owner, MoveModel move)
+    internal static void ApplyMoveCost(CharacterModel owner, MoveModel move)
     {
         var amount = move.CostAmount ?? 0;
         var category = (move.CostResource ?? string.Empty).ToLowerInvariant();
@@ -37,7 +37,7 @@ public static partial class CombatService
         if (category == "exp") owner.Exp = Math.Max(0, owner.Exp - amount);
     }
 
-    private static bool TryFlee(GameState state)
+    internal static bool TryFlee(GameState state)
     {
         if (state.Rng.NextDouble() > CombatBalanceConfig.BaseFleeSuccessChance)
         {
@@ -46,12 +46,11 @@ public static partial class CombatService
 
         state.Enemies.Clear();
         state.EnemyQueue.Clear();
-        state.SyncEnemyLegacy();
         state.ResetBattleInstance();
         return true;
     }
 
-    private static string FormatTags(DamageTags tags)
+    internal static string FormatTags(DamageTags tags)
     {
         var labels = new List<string>();
         if (tags.Weak) labels.Add("debolezza");

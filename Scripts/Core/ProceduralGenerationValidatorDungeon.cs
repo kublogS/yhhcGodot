@@ -12,7 +12,7 @@ public static partial class ProceduralGenerationValidator
             return errors;
         }
 
-        var startTile = DungeonGenerator.WorldToGrid(dungeon.PlayerSpawn, DungeonBuilder.TileSize);
+        var startTile = DungeonGenerator.WorldToGrid(dungeon.PlayerSpawn, DungeonMetrics.TileSize);
         if (!dungeon.IsWalkable(startTile.X, startTile.Y))
         {
             errors.Add("spawn not walkable");

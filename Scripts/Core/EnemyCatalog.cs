@@ -52,7 +52,6 @@ public static class EnemyCatalog
             Difesa = Math.Max(0, (int)MathF.Round(spec.Difesa * mult)),
             Agilita = Math.Max(0, (int)MathF.Round(spec.Agilita * mult)),
             Fortuna = Math.Max(0, (int)MathF.Round(spec.Fortuna * mult)),
-            Intelligenza = intel,
             Intelligence = intel,
             Fede = fede,
             Exp = Math.Max(0, (int)MathF.Round(spec.Exp * mult)),
@@ -72,7 +71,7 @@ public static class EnemyCatalog
 
     public static void AssignRandomEnemyMoves(CharacterModel enemy, GameRng rng, int movesPerEnemy = 4)
     {
-        var moveList = Database.Instance.GetMoves().Values.Where(m => !m.IsBasicAttack).ToList();
+        var moveList = Database.GetMovesSnapshot().Values.Where(m => !m.IsBasicAttack).ToList();
         if (moveList.Count == 0)
         {
             enemy.Moves = new List<MoveModel?>();

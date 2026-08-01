@@ -116,7 +116,7 @@ public static partial class CombatService
         {
             "magia" => Math.Max(0, attacker.Magia),
             "fede" => Math.Max(0, attacker.Fede),
-            "intelligence" => Math.Max(0, attacker.Intelligence == 0 ? attacker.Intelligenza : attacker.Intelligence),
+            "intelligence" => Math.Max(0, attacker.Intelligence),
             _ => Math.Max(0, attacker.Forza),
         };
     }

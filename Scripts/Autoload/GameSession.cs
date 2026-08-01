@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 
-public partial class GameSession : Node
+public partial class GameSession : Node, INewGameSessionContext, IRewardSessionContext, IBattleSessionContext
 {
     public static GameSession Instance { get; private set; } = null!;
 
@@ -20,11 +19,14 @@ public partial class GameSession : Node
     public int PendingReplaceIndex { get; set; }
     public int DeepestFloor { get; set; }
     public int LabyrinthCompletions { get; set; }
-    public bool HasEnteredOverworld { get; set; }
-    public bool RunActive { get; set; }
-    public int ProcSeed { get; set; }
-    public int ProcFloor { get; set; }
-    public int ProcMaxFloors { get; set; } = 20;
+    public RuntimeRunState CurrentRun { get; } = new();
+
+    // Legacy runtime aliases. New code should prefer CurrentRun.
+    public bool HasEnteredOverworld { get => CurrentRun.Location == RunLocation.Overworld; set => CurrentRun.Location = value ? RunLocation.Overworld : RunLocation.Indice; }
+    public bool RunActive { get => CurrentRun.IsActive; set => CurrentRun.IsActive = value; }
+    public int ProcSeed { get => CurrentRun.Seed; set => CurrentRun.Seed = Math.Max(0, value); }
+    public int ProcFloor { get => CurrentRun.Floor; set => CurrentRun.Floor = Math.Max(0, value); }
+    public int ProcMaxFloors { get => CurrentRun.MaxFloors; set => CurrentRun.MaxFloors = value; }
 
     public override void _EnterTree()
     {
@@ -41,10 +43,8 @@ public partial class GameSession : Node
         State = GameState.New(playerName, (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         DeepestFloor = 1;
         LabyrinthCompletions = 0;
-        HasEnteredOverworld = false;
-        RunActive = false;
-        ProcSeed = 0;
-        ProcFloor = 0;
+        ClearEncounterWorldEnemies();
+        CurrentRun.Reset(ProcMaxFloors);
         CurrentDungeon = null;
         OverworldEnemies.Clear();
         PlayerWorldPosition = Vector3.Zero;
@@ -58,32 +58,12 @@ public partial class GameSession : Node
             return;
         }
 
-        var nearby = OverworldEnemies
-            .Where(e => e.Active && e != enemy)
-            .Select(e => (Enemy: e, Distance: e.XYDistanceTo(enemy.X, enemy.Y)))
-            .Where(e => e.Distance <= reinforcementRadius)
-            .OrderBy(e => e.Distance)
-            .ToList();
-
-        var active = new List<CharacterModel> { enemy.ToBattleCharacter(State.Rng) };
-        var queue = new List<CharacterModel>();
-        foreach (var candidate in nearby)
+        var plan = OverworldEncounterPlanner.Build(enemy, OverworldEnemies, State.Rng, reinforcementRadius);
+        CaptureEncounterWorldEnemies(plan.ConsumedEnemies);
+        StartEncounterWithEnemies(plan.ActiveEnemies, plan.QueuedEnemies, "overworld");
+        foreach (var consumed in plan.ConsumedEnemies)
         {
-            if (active.Count < 4)
-            {
-                active.Add(candidate.Enemy.ToBattleCharacter(State.Rng));
-            }
-            else
-            {
-                queue.Add(candidate.Enemy.ToBattleCharacter(State.Rng));
-            }
-        }
-
-        StartEncounterWithEnemies(active, queue, "overworld");
-        OverworldEnemies.Remove(enemy);
-        foreach (var item in nearby)
-        {
-            OverworldEnemies.Remove(item.Enemy);
+            OverworldEnemies.Remove(consumed);
         }
     }
 
@@ -94,8 +74,7 @@ public partial class GameSession : Node
             return;
         }
 
-        State.ResetBattleInstance();
-        State.SetBattleGroups(enemies, queued);
+        BattleStateService.BeginEncounter(State, enemies, queued);
         LastEncounterContext = context;
         LastBattleLog.Clear();
     }
@@ -107,16 +86,6 @@ public partial class GameSession : Node
             return "queue";
         }
 
-        var before = State.Enemies.Count;
-        State.AddEnemyToBattle(enemy);
-        return State.Enemies.Count > before ? "active" : "queue";
-    }
-}
-
-public static class OverworldEnemyExtensions
-{
-    public static float XYDistanceTo(this OverworldEnemyModel enemy, float x, float y)
-    {
-        return MathF.Sqrt((enemy.X - x) * (enemy.X - x) + (enemy.Y - y) * (enemy.Y - y));
+        return BattleStateService.AddReinforcement(State, enemy);
     }
 }

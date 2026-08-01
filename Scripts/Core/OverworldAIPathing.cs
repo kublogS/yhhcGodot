@@ -95,12 +95,6 @@ public static partial class OverworldAI
             return false;
         }
 
-        var tile = (TileType)grid[y, x];
-        return tile == TileType.Floor
-               || tile == TileType.Doorway
-               || tile == TileType.Threshold
-               || tile == TileType.Exit
-               || tile == TileType.Breakable
-               || tile == TileType.Save;
+        return DungeonWalkabilityPolicy.IsWalkable((TileType)grid[y, x]);
     }
 }
