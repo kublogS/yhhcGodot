@@ -9,5 +9,6 @@ public sealed class RewardSummary
 public sealed class RewardActionResult
 {
     public bool Success { get; init; }
+    public bool RequiresMoveReplaceChoice { get; init; }
     public string Message { get; init; } = string.Empty;
 }

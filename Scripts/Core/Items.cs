@@ -57,7 +57,7 @@ public static class Items
             ItemId = "LibroX",
             Kind = "equipment",
             EquipSlot = "libro",
-            Bonuses = new Dictionary<string, int> { ["intelligenza"] = 10, ["intelligence"] = 10 },
+            Bonuses = new Dictionary<string, int> { [CharacterStatKeys.Intelligence] = 10 },
         },
         ["TestoSacroX"] = new ItemDef
         {
