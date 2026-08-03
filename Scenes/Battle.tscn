@@ -63,35 +63,144 @@ size_flags_vertical = 3
 theme_override_constants/separation = 22
 
 [node name="EnemyPanel" type="PanelContainer" parent="Root/CombatRow"]
-custom_minimum_size = Vector2(430, 0)
+custom_minimum_size = Vector2(0, 0)
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.35
 
-[node name="EnemyBox" type="VBoxContainer" parent="Root/CombatRow/EnemyPanel"]
-alignment = 1
-theme_override_constants/separation = 12
+[node name="EnemyPanelRoot" type="VBoxContainer" parent="Root/CombatRow/EnemyPanel"]
+size_flags_vertical = 3
+theme_override_constants/separation = 10
 
-[node name="EnemyName" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyBox"]
+[node name="EnemySlots" type="GridContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot"]
+size_flags_vertical = 3
+columns = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="EnemyCard1" type="PanelContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="EnemyCardBox" type="VBoxContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard1"]
+theme_override_constants/separation = 5
+
+[node name="EnemyName" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard1/EnemyCardBox"]
 text = "Enemy"
-horizontal_alignment = 1
+horizontal_alignment = 0
 
-[node name="EnemySprite" type="TextureRect" parent="Root/CombatRow/EnemyPanel/EnemyBox"]
-custom_minimum_size = Vector2(420, 300)
+[node name="EnemyHpLabel" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard1/EnemyCardBox"]
+text = "HP 0/0"
+horizontal_alignment = 0
+
+[node name="EnemyHpBar" type="ProgressBar" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard1/EnemyCardBox"]
+custom_minimum_size = Vector2(0, 20)
+step = 1.0
+
+[node name="EnemySprite" type="TextureRect" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard1/EnemyCardBox"]
+custom_minimum_size = Vector2(0, 260)
 size_flags_vertical = 3
 expand_mode = 1
 stretch_mode = 5
 
-[node name="EnemyHitFlash" type="ColorRect" parent="Root/CombatRow/EnemyPanel/EnemyBox/EnemySprite"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.921569, 0.0784314, 0.0784314, 0)
-mouse_filter = 2
+[node name="EnemyCard2" type="PanelContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="EnemyCardBox" type="VBoxContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard2"]
+theme_override_constants/separation = 5
+
+[node name="EnemyName" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard2/EnemyCardBox"]
+text = "Enemy"
+horizontal_alignment = 0
+
+[node name="EnemyHpLabel" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard2/EnemyCardBox"]
+text = "HP 0/0"
+horizontal_alignment = 0
+
+[node name="EnemyHpBar" type="ProgressBar" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard2/EnemyCardBox"]
+custom_minimum_size = Vector2(0, 20)
+step = 1.0
+
+[node name="EnemySprite" type="TextureRect" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard2/EnemyCardBox"]
+custom_minimum_size = Vector2(0, 260)
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EnemyCard3" type="PanelContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="EnemyCardBox" type="VBoxContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard3"]
+theme_override_constants/separation = 5
+
+[node name="EnemyName" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard3/EnemyCardBox"]
+text = "Enemy"
+horizontal_alignment = 0
+
+[node name="EnemyHpLabel" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard3/EnemyCardBox"]
+text = "HP 0/0"
+horizontal_alignment = 0
+
+[node name="EnemyHpBar" type="ProgressBar" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard3/EnemyCardBox"]
+custom_minimum_size = Vector2(0, 20)
+step = 1.0
+
+[node name="EnemySprite" type="TextureRect" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard3/EnemyCardBox"]
+custom_minimum_size = Vector2(0, 260)
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EnemyCard4" type="PanelContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="EnemyCardBox" type="VBoxContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard4"]
+theme_override_constants/separation = 5
+
+[node name="EnemyName" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard4/EnemyCardBox"]
+text = "Enemy"
+horizontal_alignment = 0
+
+[node name="EnemyHpLabel" type="Label" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard4/EnemyCardBox"]
+text = "HP 0/0"
+horizontal_alignment = 0
+
+[node name="EnemyHpBar" type="ProgressBar" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard4/EnemyCardBox"]
+custom_minimum_size = Vector2(0, 20)
+step = 1.0
+
+[node name="EnemySprite" type="TextureRect" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemySlots/EnemyCard4/EnemyCardBox"]
+custom_minimum_size = Vector2(0, 260)
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EnemyRoster" type="HBoxContainer" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot"]
+theme_override_constants/separation = 6
+
+[node name="EnemyMini1" type="Button" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemyRoster"]
+size_flags_horizontal = 3
+text = "-"
+
+[node name="EnemyMini2" type="Button" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemyRoster"]
+size_flags_horizontal = 3
+text = "-"
+
+[node name="EnemyMini3" type="Button" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemyRoster"]
+size_flags_horizontal = 3
+text = "-"
+
+[node name="EnemyMini4" type="Button" parent="Root/CombatRow/EnemyPanel/EnemyPanelRoot/EnemyRoster"]
+size_flags_horizontal = 3
+text = "-"
 
 [node name="HudPanel" type="PanelContainer" parent="Root/CombatRow"]
-custom_minimum_size = Vector2(510, 0)
+custom_minimum_size = Vector2(360, 0)
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.2
+clip_contents = true
 
 [node name="HudRoot" type="Control" parent="Root/CombatRow/HudPanel"]
 layout_mode = 2
@@ -119,66 +228,110 @@ grow_horizontal = 2
 color = Color(1, 0.992157, 0.960784, 0.14)
 mouse_filter = 2
 
-[node name="Hud" type="VBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot"]
-anchors_preset = 15
+[node name="TopRightLog" type="RichTextLabel" parent="Root/CombatRow/HudPanel/HudRoot"]
+anchor_left = 1.0
 anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 14.0
+offset_left = -360.0
 offset_top = 14.0
 offset_right = -14.0
+offset_bottom = 112.0
+bbcode_enabled = true
+scroll_active = false
+
+[node name="Hud" type="VBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_top = -326.0
+offset_right = -14.0
 offset_bottom = -14.0
-grow_horizontal = 2
-grow_vertical = 2
 theme_override_constants/separation = 10
 
-[node name="Log" type="RichTextLabel" parent="Root/CombatRow/HudPanel/HudRoot/Hud"]
-custom_minimum_size = Vector2(0, 190)
+[node name="PlayerStatsPanel" type="PanelContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud"]
+custom_minimum_size = Vector2(0, 205)
+
+[node name="PlayerStats" type="VBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud/PlayerStatsPanel"]
 size_flags_vertical = 3
+theme_override_constants/separation = 5
 
-[node name="Targets" type="HBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud"]
-theme_override_constants/separation = 8
+[node name="PlayerName" type="Label" parent="Root/CombatRow/HudPanel/HudRoot/Hud/PlayerStatsPanel/PlayerStats"]
+text = "Player"
+horizontal_alignment = 0
 
-[node name="Target1" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Targets"]
-text = "Enemy 1"
+[node name="PlayerHpLabel" type="Label" parent="Root/CombatRow/HudPanel/HudRoot/Hud/PlayerStatsPanel/PlayerStats"]
+text = "HP"
+horizontal_alignment = 0
 
-[node name="Target2" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Targets"]
-text = "Enemy 2"
+[node name="PlayerHpBar" type="ProgressBar" parent="Root/CombatRow/HudPanel/HudRoot/Hud/PlayerStatsPanel/PlayerStats"]
+custom_minimum_size = Vector2(0, 22)
+step = 1.0
 
-[node name="Target3" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Targets"]
-text = "Enemy 3"
+[node name="PlayerManaLabel" type="Label" parent="Root/CombatRow/HudPanel/HudRoot/Hud/PlayerStatsPanel/PlayerStats"]
+text = "MN"
+horizontal_alignment = 0
 
-[node name="Target4" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Targets"]
-text = "Enemy 4"
+[node name="PlayerManaBar" type="ProgressBar" parent="Root/CombatRow/HudPanel/HudRoot/Hud/PlayerStatsPanel/PlayerStats"]
+custom_minimum_size = Vector2(0, 22)
+step = 1.0
 
-[node name="Actions" type="VBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud"]
-theme_override_constants/separation = 8
+[node name="PlayerExpLabel" type="Label" parent="Root/CombatRow/HudPanel/HudRoot/Hud/PlayerStatsPanel/PlayerStats"]
+text = "EXP"
+horizontal_alignment = 0
 
-[node name="Moves" type="HBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions"]
-theme_override_constants/separation = 8
+[node name="PlayerExpBar" type="ProgressBar" parent="Root/CombatRow/HudPanel/HudRoot/Hud/PlayerStatsPanel/PlayerStats"]
+custom_minimum_size = Vector2(0, 22)
+step = 1.0
 
-[node name="Move0" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
+[node name="ActionsRow" type="VBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud"]
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="AttackGrid" type="GridContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow"]
+columns = 2
+theme_override_constants/h_separation = 5
+theme_override_constants/v_separation = 5
+
+[node name="Move0" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow/AttackGrid"]
+custom_minimum_size = Vector2(0, 0)
+size_flags_horizontal = 3
 text = "1"
 
-[node name="Move1" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
+[node name="Move1" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow/AttackGrid"]
+custom_minimum_size = Vector2(0, 0)
+size_flags_horizontal = 3
 text = "2"
 
-[node name="Move2" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
+[node name="Move2" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow/AttackGrid"]
+custom_minimum_size = Vector2(0, 0)
+size_flags_horizontal = 3
 text = "3"
 
-[node name="Move3" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
+[node name="Move3" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow/AttackGrid"]
+custom_minimum_size = Vector2(0, 0)
+size_flags_horizontal = 3
 text = "4"
 
-[node name="Move4" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/Moves"]
+[node name="Move4" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow/AttackGrid"]
+custom_minimum_size = Vector2(0, 0)
+size_flags_horizontal = 3
 text = "5"
 
-[node name="ActionBar" type="HBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions"]
-theme_override_constants/separation = 8
+[node name="MoveFiller" type="Control" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow/AttackGrid"]
+size_flags_horizontal = 3
 
-[node name="Defend" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/ActionBar"]
+[node name="UtilityRow" type="HBoxContainer" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow"]
+theme_override_constants/separation = 5
+
+[node name="Defend" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow/UtilityRow"]
+size_flags_horizontal = 3
 text = "Difenditi"
 
-[node name="Items" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/ActionBar"]
+[node name="Items" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow/UtilityRow"]
+size_flags_horizontal = 3
 text = "Items"
 
-[node name="Flee" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/Actions/ActionBar"]
+[node name="Flee" type="Button" parent="Root/CombatRow/HudPanel/HudRoot/Hud/ActionsRow/UtilityRow"]
+size_flags_horizontal = 3
 text = "Fuga"

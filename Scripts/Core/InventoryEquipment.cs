@@ -68,24 +68,21 @@ public static partial class Inventory
         foreach (var (stat, value) in info.Bonuses)
         {
             var delta = value * sign;
-            switch (stat)
+            switch (CharacterStatKeys.Normalize(stat))
             {
-                case "forza":
+                case CharacterStatKeys.Strength:
                     player.Forza = Math.Max(0, player.Forza + delta);
                     break;
-                case "magia":
+                case CharacterStatKeys.Magic:
                     player.Magia = Math.Max(0, player.Magia + delta);
                     break;
-                case "difesa":
+                case CharacterStatKeys.Defense:
                     player.Difesa = Math.Max(0, player.Difesa + delta);
                     break;
-                case "fede":
+                case CharacterStatKeys.Faith:
                     player.Fede = Math.Max(0, player.Fede + delta);
                     break;
-                case "intelligenza":
-                    player.Intelligenza = Math.Max(0, player.Intelligenza + delta);
-                    break;
-                case "intelligence":
+                case CharacterStatKeys.Intelligence:
                     player.Intelligence = Math.Max(0, player.Intelligence + delta);
                     break;
             }

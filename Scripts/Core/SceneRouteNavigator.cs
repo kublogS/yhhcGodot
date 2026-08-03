@@ -4,29 +4,66 @@ public static class SceneRouteNavigator
 {
     public static void Navigate(SceneRoute route, SceneTree tree)
     {
+        var router = tree.Root.GetNodeOrNull<SceneRouter>("/root/SceneRouter");
+        if (router is null)
+        {
+            NavigateWithoutRouter(route, tree);
+            return;
+        }
+
         switch (route)
         {
             case SceneRoute.MainMenu:
-                SceneRouter.Instance.GoToMainMenu();
+                router.GoToMainMenu();
                 break;
             case SceneRoute.SavesMenu:
-                SceneRouter.Instance.GoToSavesMenu();
+                router.GoToSavesMenu();
                 break;
             case SceneRoute.NameEntry:
-                SceneRouter.Instance.GoToNameEntry();
+                router.GoToNameEntry();
                 break;
             case SceneRoute.Explore:
-                SceneRouter.Instance.GoToExplore();
+                router.GoToExplore();
                 break;
             case SceneRoute.Battle:
-                SceneRouter.Instance.GoToBattle();
+                router.GoToBattle();
                 break;
             case SceneRoute.Reward:
-                SceneRouter.Instance.GoToReward();
+                router.GoToReward();
                 break;
             case SceneRoute.Quit:
                 tree.Quit();
                 break;
+        }
+    }
+
+    private static void NavigateWithoutRouter(SceneRoute route, SceneTree tree)
+    {
+        if (route == SceneRoute.Quit)
+        {
+            tree.Quit();
+            return;
+        }
+
+        var scenePath = route switch
+        {
+            SceneRoute.MainMenu => "res://Scenes/MainMenu.tscn",
+            SceneRoute.SavesMenu => "res://Scenes/SavesMenu.tscn",
+            SceneRoute.NameEntry => "res://Scenes/NameEntry.tscn",
+            SceneRoute.Explore => "res://Scenes/Explore.tscn",
+            SceneRoute.Battle => "res://Scenes/Battle.tscn",
+            SceneRoute.Reward => "res://Scenes/Reward.tscn",
+            _ => string.Empty,
+        };
+        if (string.IsNullOrWhiteSpace(scenePath))
+        {
+            return;
+        }
+
+        var err = tree.ChangeSceneToFile(scenePath);
+        if (err != Error.Ok)
+        {
+            GD.PrintErr($"Cambio scena fallback fallito: {scenePath} ({err})");
         }
     }
 }

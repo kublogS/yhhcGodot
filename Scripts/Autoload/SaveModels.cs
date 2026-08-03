@@ -23,6 +23,7 @@ public sealed class SavedWorld
     public int Width { get; set; }
     public int Height { get; set; }
     public List<int> GridFlat { get; set; } = new();
+    public List<int> BrokenBreakablePairs { get; set; } = new();
     public int Seed { get; set; }
     public int FloorIndex { get; set; }
     public float PlayerX { get; set; }
@@ -36,6 +37,15 @@ public sealed class SavedGameRng
     public uint RngState { get; set; }
 }
 
+public sealed class SavedRunState
+{
+    public bool IsActive { get; set; }
+    public string Location { get; set; } = nameof(global::RunLocation.Indice);
+    public int Seed { get; set; }
+    public int Floor { get; set; }
+    public int MaxFloors { get; set; } = 20;
+}
+
 public sealed class SavedRuntime
 {
     public SavedWorld World { get; set; } = new();
@@ -43,8 +53,12 @@ public sealed class SavedRuntime
     public string LastEncounterContext { get; set; } = "";
     public int DeepestFloor { get; set; }
     public int LabyrinthCompletions { get; set; }
+    public SavedRunState Run { get; set; } = new();
+
+    // Legacy save fields kept for backward-compatible reads.
     public bool HasEnteredOverworld { get; set; }
     public bool RunActive { get; set; }
+    public string RunLocation { get; set; } = nameof(global::RunLocation.Indice);
     public int ProceduralSeed { get; set; }
     public int ProceduralFloor { get; set; }
     public int ProceduralMaxFloors { get; set; } = 20;
@@ -76,4 +90,5 @@ public enum SaveCopyResult
     SameSlot,
     SourceEmpty,
     TargetOccupied,
+    WriteFailed,
 }

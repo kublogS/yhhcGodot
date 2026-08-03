@@ -4,7 +4,6 @@ using System.Collections.Generic;
 public sealed class GameState
 {
     public CharacterModel Player { get; set; } = new();
-    public CharacterModel Enemy { get; set; } = new();
     public Progression Prog { get; set; } = new();
     public GameRng Rng { get; set; } = new(12345);
     public List<CharacterModel> Enemies { get; set; } = new();
@@ -21,14 +20,6 @@ public sealed class GameState
 
     public bool BattleHasCapacity() => Enemies.Count < 4;
 
-    public void SyncEnemyLegacy()
-    {
-        if (Enemies.Count > 0)
-        {
-            Enemy = Enemies[0];
-        }
-    }
-
     public void AddEnemyToBattle(CharacterModel enemy)
     {
         if (BattleHasCapacity())
@@ -40,7 +31,6 @@ public sealed class GameState
             EnemyQueue.Add(enemy);
         }
 
-        SyncEnemyLegacy();
     }
 
     public int PopNextFromQueueIfPossible()
@@ -53,7 +43,6 @@ public sealed class GameState
             moved++;
         }
 
-        SyncEnemyLegacy();
         return moved;
     }
 
@@ -66,7 +55,6 @@ public sealed class GameState
             EnemyQueue.AddRange(queued);
         }
 
-        SyncEnemyLegacy();
     }
 
     public void ResetBattleInstance()
@@ -84,10 +72,10 @@ public sealed class GameState
 
     public CharacterModel RespawnEnemy()
     {
-        Enemy = SpawnNextEnemy(Rng, Prog);
-        Enemies = new List<CharacterModel> { Enemy };
+        var enemy = SpawnNextEnemy(Rng, Prog);
+        Enemies = new List<CharacterModel> { enemy };
         EnemyQueue = new List<CharacterModel>();
-        return Enemy;
+        return enemy;
     }
 
     public static GameState New(string playerName, int? seed = null)
@@ -105,7 +93,6 @@ public sealed class GameState
         return new GameState
         {
             Player = player,
-            Enemy = enemy,
             Enemies = new List<CharacterModel> { enemy },
             EnemyQueue = new List<CharacterModel>(),
             Rng = rng,
@@ -149,7 +136,6 @@ public sealed class GameState
             Difesa = 2,
             Agilita = 4,
             Fortuna = 4,
-            Intelligenza = 10,
             Intelligence = 10,
             Fede = 10,
             Exp = 0,

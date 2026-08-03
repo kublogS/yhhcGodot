@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://Scripts/Explore/ExploreController.cs" id="1"]
 [ext_resource type="Script" path="res://Scripts/Explore/PlayerController.cs" id="2"]
@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" path="res://Scenes/UI/MapOverlay.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/ManualOverlay.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/PauseOverlay.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://Scenes/Battle.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://Scenes/Reward.tscn" id="8"]
 
 [sub_resource type="CapsuleShape3D" id="1"]
 radius = 0.4
@@ -29,6 +31,14 @@ current = true
 
 [node name="EnemiesRoot" type="Node3D" parent="."]
 
+[node name="BattlePresentationRoot" type="Node3D" parent="."]
+visible = false
+
+[node name="BattleCamera" type="Camera3D" parent="."]
+position = Vector3(0, 4, -6)
+fov = 55.0
+current = false
+
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="HudOverlay" parent="CanvasLayer" instance=ExtResource("3")]
@@ -38,3 +48,9 @@ current = true
 [node name="ManualOverlay" parent="CanvasLayer" instance=ExtResource("5")]
 
 [node name="PauseOverlay" parent="CanvasLayer" instance=ExtResource("6")]
+
+[node name="BattleOverlay" parent="CanvasLayer" instance=ExtResource("7")]
+visible = false
+
+[node name="RewardOverlay" parent="CanvasLayer" instance=ExtResource("8")]
+visible = false

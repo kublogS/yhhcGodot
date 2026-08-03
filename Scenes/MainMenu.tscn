@@ -51,11 +51,6 @@ custom_minimum_size = Vector2(460, 280)
 alignment = 1
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="Center/VBox"]
-text = "YOU HAVE TO HAVE CHARACTER"
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 36
-
 [node name="PartiteButton" type="Button" parent="Center/VBox"]
 text = "Partite"
 

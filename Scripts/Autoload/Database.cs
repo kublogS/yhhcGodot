@@ -61,6 +61,16 @@ public partial class Database : Node
         return "Descrizione non trovata.";
     }
 
+    public static Dictionary<int, MoveModel> GetMovesSnapshot()
+    {
+        return Resolve()?.GetMoves() ?? new Dictionary<int, MoveModel>();
+    }
+
+    public static string GetItemDescriptionSafe(string itemId)
+    {
+        return Resolve()?.GetItemDescription(itemId) ?? "Descrizione non trovata.";
+    }
+
     private Dictionary<int, MoveModel> LoadMoves()
     {
         var path = "res://Data/moves.json";
@@ -122,5 +132,16 @@ public partial class Database : Node
         }
 
         dir.ListDirEnd();
+    }
+
+    private static Database? Resolve()
+    {
+        if (Instance is not null)
+        {
+            return Instance;
+        }
+
+        var tree = Engine.GetMainLoop() as SceneTree;
+        return tree?.Root.GetNodeOrNull<Database>("/root/Database");
     }
 }

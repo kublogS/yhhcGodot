@@ -18,15 +18,17 @@ public static class SpawnHubBuilder
     private const float FloorThickness = 0.2f;
     private const float WallThickness = 0.45f;
     private const float WallHeight = 6.9f;
-    private const float DoorWidth = 4.2f;
-    private const float DoorClearHeight = 4.4f;
+    private const float DoorWidth = 8.4f;
+    private const float DoorClearHeight = 5.8f;
 
     public static SpawnHubLayout Build(Node3D root)
     {
         Clear(root);
         var floorColor = MakeMaterial(PythonColorPalette.FloorLightGray);
-        var wallColor = MakeMaterial(PythonColorPalette.GrayDark);
-        var doorColor = MakeMaterial(PythonColorPalette.Door);
+        var wallColor = DungeonMaterialFactory.CreateHubWallMaterial();
+        var frameColor = DungeonMaterialFactory.CreateObsidianFrameMaterial();
+        var insetColor = DungeonMaterialFactory.CreateObsidianInsetMaterial();
+        var edgeColor = DungeonMaterialFactory.CreatePortalEdgeMaterial();
 
         var mapSize = GridSize * TileSize;
         var half = mapSize * 0.5f;
@@ -47,12 +49,11 @@ public static class SpawnHubBuilder
         var lintelY = (DoorClearHeight + (lintelHeight * 0.5f)) - (FloorThickness * 0.5f);
         AddSolid(root, new Vector3(DoorWidth, lintelHeight, WallThickness), new Vector3(0f, lintelY, northZ), wallColor);
 
-        var portalSize = new Vector2(DoorWidth - 0.45f, DoorClearHeight - 0.55f);
-        var portalPosition = new Vector3(0f, (DoorClearHeight * 0.5f) - 0.22f, northZ - 0.2f);
+        var portalSize = new Vector2(DoorWidth - 1.2f, DoorClearHeight - 1.0f);
+        var portalPosition = new Vector3(0f, (DoorClearHeight * 0.5f) - 0.18f, northZ - 0.28f);
         AddPortal(root, portalSize, portalPosition);
-        AddVisual(root, new Vector3(0.24f, DoorClearHeight - 0.2f, WallThickness), new Vector3(-(DoorWidth * 0.5f) + 0.12f, (DoorClearHeight * 0.5f) - 0.1f, northZ), doorColor);
-        AddVisual(root, new Vector3(0.24f, DoorClearHeight - 0.2f, WallThickness), new Vector3((DoorWidth * 0.5f) - 0.12f, (DoorClearHeight * 0.5f) - 0.1f, northZ), doorColor);
-        AddVisual(root, new Vector3(DoorWidth, 0.24f, WallThickness), new Vector3(0f, DoorClearHeight - 0.12f, northZ), doorColor);
+        BuildPortalFrame(root, northZ, frameColor, insetColor, edgeColor);
+        AddPortalLights(root, northZ);
 
         return new SpawnHubLayout
         {
@@ -62,8 +63,52 @@ public static class SpawnHubBuilder
             PosterAnchor = new Vector3(0f, 2.0f, -innerEdge + 0.22f),
             PosterNormal = Vector3.Back,
             PortalEntryMinZ = northZ - (WallThickness * 0.5f) + 0.03f,
-            PortalEntryHalfWidth = (DoorWidth * 0.5f) - 0.22f,
+            PortalEntryHalfWidth = (DoorWidth * 0.5f) - 0.6f,
         };
+    }
+
+    private static void BuildPortalFrame(Node3D root, float northZ, Material frameMaterial, Material insetMaterial, Material edgeMaterial)
+    {
+        var columnX = (DoorWidth * 0.5f) - 0.38f;
+        var midY = (DoorClearHeight * 0.5f) + 0.08f;
+        AddVisual(root, new Vector3(0.86f, DoorClearHeight + 1.05f, 0.88f), new Vector3(-columnX, midY, northZ + 0.16f), frameMaterial);
+        AddVisual(root, new Vector3(0.86f, DoorClearHeight + 1.05f, 0.88f), new Vector3(columnX, midY, northZ + 0.16f), frameMaterial);
+        AddVisual(root, new Vector3(1.36f, DoorClearHeight + 1.24f, 0.26f), new Vector3(-columnX, midY, northZ + 0.48f), frameMaterial);
+        AddVisual(root, new Vector3(1.36f, DoorClearHeight + 1.24f, 0.26f), new Vector3(columnX, midY, northZ + 0.48f), frameMaterial);
+        AddVisual(root, new Vector3(1.18f, DoorClearHeight + 0.58f, 0.34f), new Vector3(-columnX, midY + 0.03f, northZ - 0.06f), insetMaterial);
+        AddVisual(root, new Vector3(1.18f, DoorClearHeight + 0.58f, 0.34f), new Vector3(columnX, midY + 0.03f, northZ - 0.06f), insetMaterial);
+        AddVisual(root, new Vector3(DoorWidth + 0.9f, 0.84f, 0.92f), new Vector3(0f, DoorClearHeight + 0.12f, northZ + 0.18f), frameMaterial);
+        AddVisual(root, new Vector3(DoorWidth + 1.45f, 0.42f, 0.7f), new Vector3(0f, DoorClearHeight + 0.58f, northZ + 0.1f), frameMaterial);
+        AddVisual(root, new Vector3(DoorWidth + 2.0f, 0.24f, 0.44f), new Vector3(0f, DoorClearHeight + 0.86f, northZ + 0.18f), frameMaterial);
+        AddVisual(root, new Vector3(DoorWidth - 0.28f, 0.34f, 0.46f), new Vector3(0f, DoorClearHeight + 0.3f, northZ - 0.12f), insetMaterial);
+        AddVisual(root, new Vector3(1.24f, 1.02f, 0.58f), new Vector3(0f, DoorClearHeight + 0.66f, northZ + 0.08f), frameMaterial);
+        AddVisual(root, new Vector3(0.58f, 0.42f, 0.2f), new Vector3(0f, DoorClearHeight + 0.88f, northZ - 0.16f), insetMaterial);
+        AddVisual(root, new Vector3(2.18f, 0.24f, 0.36f), new Vector3(0f, DoorClearHeight + 1.12f, northZ + 0.06f), frameMaterial);
+        AddVisual(root, new Vector3(DoorWidth - 0.62f, 0.5f, 0.5f), new Vector3(0f, 0.18f, northZ + 0.1f), frameMaterial);
+        AddVisual(root, new Vector3(DoorWidth - 1.52f, DoorClearHeight - 0.76f, 0.18f), new Vector3(0f, (DoorClearHeight * 0.5f) - 0.16f, northZ - 0.12f), insetMaterial);
+        AddVisual(root, new Vector3(DoorWidth - 1.22f, 0.1f, 0.1f), new Vector3(0f, DoorClearHeight - 0.12f, northZ - 0.19f), edgeMaterial);
+        AddVisual(root, new Vector3(0.1f, DoorClearHeight - 0.98f, 0.1f), new Vector3(-(DoorWidth * 0.5f) + 0.68f, (DoorClearHeight * 0.5f) - 0.12f, northZ - 0.19f), edgeMaterial);
+        AddVisual(root, new Vector3(0.1f, DoorClearHeight - 0.98f, 0.1f), new Vector3((DoorWidth * 0.5f) - 0.68f, (DoorClearHeight * 0.5f) - 0.12f, northZ - 0.19f), edgeMaterial);
+        AddVisual(root, new Vector3(DoorWidth - 1.22f, 0.1f, 0.1f), new Vector3(0f, 0.38f, northZ - 0.19f), edgeMaterial);
+    }
+
+    private static void AddPortalLights(Node3D root, float northZ)
+    {
+        AddPortalLight(root, new Vector3(-(DoorWidth * 0.5f) + 1.05f, DoorClearHeight * 0.74f, northZ - 0.34f));
+        AddPortalLight(root, new Vector3((DoorWidth * 0.5f) - 1.05f, DoorClearHeight * 0.74f, northZ - 0.34f));
+    }
+
+    private static void AddPortalLight(Node3D root, Vector3 position)
+    {
+        root.AddChild(new OmniLight3D
+        {
+            Position = position,
+            LightColor = new Color(0.62f, 0.77f, 0.92f, 1f),
+            LightEnergy = 0.38f,
+            LightSpecular = 0.85f,
+            ShadowEnabled = false,
+            OmniRange = 6.5f,
+        });
     }
 
     private static void AddSolid(Node3D root, Vector3 size, Vector3 position, Material material)

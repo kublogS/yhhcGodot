@@ -3,6 +3,7 @@ using System;
 
 public partial class PauseOverlayController : Control
 {
+    private DisplaySettingsService _displaySettings = null!;
     private VBoxContainer _settingsBox = null!;
     private Label _settingsInfo = null!;
 
@@ -12,6 +13,7 @@ public partial class PauseOverlayController : Control
 
     public override void _Ready()
     {
+        _displaySettings = GetNode<DisplaySettingsService>("/root/DisplaySettings");
         var resume = GetNode<Button>("Panel/VBox/Resume");
         var toIndex = GetNode<Button>("Panel/VBox/ToIndex");
         var settings = GetNode<Button>("Panel/VBox/Settings");
@@ -59,22 +61,22 @@ public partial class PauseOverlayController : Control
 
     private void ApplyAutoSettings()
     {
-        DisplaySettingsService.Instance.ApplyAutomaticResolution();
+        _displaySettings.ApplyAutomaticResolution();
         RefreshSettingsInfo();
     }
 
     private void ToggleWindowMode()
     {
-        var current = DisplaySettingsService.Instance.GetCurrentOption();
+        var current = _displaySettings.GetCurrentOption();
         var isFullscreen = GetWindow().Mode == Window.ModeEnum.Fullscreen;
         var mode = isFullscreen ? ResolutionModePreference.Windowed : ResolutionModePreference.BorderlessFullscreen;
-        DisplaySettingsService.Instance.ApplyManualResolution(current, mode);
+        _displaySettings.ApplyManualResolution(current, mode);
         RefreshSettingsInfo();
     }
 
     private void RefreshSettingsInfo()
     {
-        var option = DisplaySettingsService.Instance.GetCurrentOption();
+        var option = _displaySettings.GetCurrentOption();
         var mode = GetWindow().Mode == Window.ModeEnum.Fullscreen ? "Fullscreen" : "Windowed";
         _settingsInfo.Text = $"Risoluzione: {option.Label}  •  Modalita: {mode}";
     }

@@ -2,11 +2,13 @@ using System.Collections.Generic;
 
 public sealed class BattleFlowCoordinator
 {
-    private readonly GameSession _session;
+    private readonly IBattleSessionContext _session;
+    private readonly IBattleAnalyticsSink _analytics;
 
-    public BattleFlowCoordinator(GameSession session)
+    public BattleFlowCoordinator(IBattleSessionContext session, IBattleAnalyticsSink? analytics = null)
     {
         _session = session;
+        _analytics = analytics ?? NullBattleAnalyticsSink.Instance;
     }
 
     public BattleFlowResult ExecuteTurn(CombatTurnRequest request)
@@ -16,24 +18,27 @@ public sealed class BattleFlowCoordinator
         if (state is null)
         {
             AppendSystemEvent(result, "Sessione non valida: ritorno al menu principale.");
-            result.Route = SceneRoute.MainMenu;
+            result.Outcome = BattleFlowOutcome.GoToMainMenu;
             return result;
         }
 
         var outcome = CombatService.CombatTurn(state, request);
         result.LogLines.AddRange(outcome.LogLines);
         result.Events.AddRange(outcome.Events);
+        _analytics.RecordTurn(state, request, outcome);
 
         if (outcome.PlayerDefeated)
         {
             AppendSystemEvent(result, "Game Over.");
-            result.Route = SceneRoute.MainMenu;
+            _analytics.EndBattle(state, "Sconfitta");
+            result.Outcome = BattleFlowOutcome.GoToMainMenu;
             return result;
         }
 
         if (outcome.Fled)
         {
-            result.Route = SceneRoute.Explore;
+            _analytics.EndBattle(state, "Fuga");
+            result.Outcome = BattleFlowOutcome.ReturnToExplore;
             return result;
         }
 
@@ -41,7 +46,8 @@ public sealed class BattleFlowCoordinator
         {
             var rewards = _session.FinalizeBattleRewards();
             AppendSystemEvent(result, $"Ricompense: Soli {rewards.Soli}, Oggetti {rewards.Items}, Mosse {rewards.Tokens}");
-            result.Route = SceneRoute.Reward;
+            _analytics.EndBattle(state, "Vittoria");
+            result.Outcome = BattleFlowOutcome.OpenReward;
             return result;
         }
 
@@ -68,25 +74,7 @@ public sealed class BattleFlowCoordinator
             moves.Add($"{i + 1}. {move.Name}");
         }
 
-        var targets = new List<BattleTargetView>();
-        for (var i = 0; i < 4; i++)
-        {
-            if (i < state.Enemies.Count)
-            {
-                var enemy = state.Enemies[i];
-                targets.Add(new BattleTargetView
-                {
-                    Visible = true,
-                    Selected = i == selectedTarget,
-                    Label = $"{enemy.Name} {enemy.Hp}/{enemy.MaxHp}",
-                });
-                continue;
-            }
-
-            targets.Add(new BattleTargetView { Visible = false, Selected = false, Label = string.Empty });
-        }
-
-        return new BattleScreenState { MoveLabels = moves, Targets = targets };
+        return new BattleScreenState { MoveLabels = moves };
     }
 
     private static void AppendSystemEvent(BattleFlowResult result, string message)

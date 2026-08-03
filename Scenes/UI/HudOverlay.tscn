@@ -14,7 +14,7 @@ script = ExtResource("1")
 offset_left = 12.0
 offset_top = 12.0
 offset_right = 270.0
-offset_bottom = 150.0
+offset_bottom = 252.0
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 anchors_preset = 15
@@ -33,8 +33,23 @@ text = "Player"
 [node name="Hp" type="Label" parent="Panel/VBox"]
 text = "HP"
 
+[node name="HpBar" type="ProgressBar" parent="Panel/VBox"]
+custom_minimum_size = Vector2(0, 12)
+step = 1.0
+
 [node name="Mana" type="Label" parent="Panel/VBox"]
 text = "Mana"
+
+[node name="ManaBar" type="ProgressBar" parent="Panel/VBox"]
+custom_minimum_size = Vector2(0, 12)
+step = 1.0
+
+[node name="Exp" type="Label" parent="Panel/VBox"]
+text = "Exp"
+
+[node name="ExpBar" type="ProgressBar" parent="Panel/VBox"]
+custom_minimum_size = Vector2(0, 12)
+step = 1.0
 
 [node name="Soli" type="Label" parent="Panel/VBox"]
 text = "Soli"

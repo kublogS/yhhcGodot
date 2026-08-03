@@ -128,9 +128,9 @@ public static class ManualTextRepository
             {
                 return File.ReadAllText(path, Encoding.UTF8);
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                GD.PrintErr($"Impossibile leggere il manuale esterno {path}: {ex.Message}");
             }
         }
 
