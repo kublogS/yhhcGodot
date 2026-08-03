@@ -5,7 +5,7 @@ public partial class EnemyAgent : CharacterBody3D
 {
     public OverworldEnemyModel Model { get; private set; } = new();
     private static readonly EnemyAsciiBillboardFactory AsciiFactory = new();
-    private static readonly EnemyModelVisualFactory ModelFactory = new();
+    private static readonly EnemyVoxelVisualFactory VoxelFactory = new();
 
     private readonly EnemyVisualAnimator _visualAnimator = new();
     private readonly EnemyWingFlapRig _wingFlapRig = new();
@@ -32,7 +32,7 @@ public partial class EnemyAgent : CharacterBody3D
         ConfigureVisualProfile();
         ClearChildren();
 
-        _visualRoot = ModelFactory.Create(Model.Sprite);
+        _visualRoot = VoxelFactory.Create(Model.Sprite);
         if (_visualRoot is not null)
         {
             BindVisualHierarchy(_visualRoot);
