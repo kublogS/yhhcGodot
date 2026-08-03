@@ -38,13 +38,20 @@ public sealed class ExploreWorldInteractionService
             return false;
         }
 
+        var playerCharacter = session.State?.Player;
+        if (playerCharacter is not null)
+        {
+            playerCharacter.Hp = playerCharacter.MaxHp;
+            playerCharacter.Mana = playerCharacter.MaxMana;
+        }
+
         var saved = saveService.SaveToSlot(session.CurrentSlot);
         hud.ShowTransientStatus(saved
-            ? $"Salvato nello slot {session.CurrentSlot}"
-            : "Salvataggio fallito");
+            ? $"Curato e salvato nello slot {session.CurrentSlot}"
+            : "Curato, ma il salvataggio è fallito");
         GD.Print(saved
-            ? $"[Save] Slot {session.CurrentSlot} aggiornato nel santuario."
-            : "[Save] Salvataggio fallito nel santuario.");
+            ? $"[Save] Slot {session.CurrentSlot} curato e aggiornato nel santuario."
+            : "[Save] Cura applicata, ma il salvataggio è fallito nel santuario.");
         return true;
     }
 

@@ -58,4 +58,18 @@ public static partial class CombatService
         if (tags.Crit) labels.Add("critico");
         return labels.Count > 0 ? $" [{string.Join(", ", labels)}]" : string.Empty;
     }
+
+    internal static Dictionary<string, string> BuildTagMetadata(DamageTags tags)
+    {
+        return new Dictionary<string, string>
+        {
+            ["attackType"] = tags.AttackType ?? string.Empty,
+            ["weak"] = tags.Weak.ToString(),
+            ["nullified"] = tags.Nullified.ToString(),
+            ["sameFamily"] = tags.SameFamily.ToString(),
+            ["enemyFamily"] = tags.EnemyFamily.ToString(),
+            ["stab"] = tags.Stab.ToString(),
+            ["crit"] = tags.Crit.ToString(),
+        };
+    }
 }

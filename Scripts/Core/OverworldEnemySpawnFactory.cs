@@ -44,7 +44,7 @@ public static class OverworldEnemySpawnFactory
             BehaviorKind = OverworldBehavior.Ansioso,
             Aggressive = true,
             IsFloorBoss = true,
-            BattleMult = floorMult + 0.35f,
+            BattleMult = floorMult * EnemyCatalog.BossMult,
             Speed = 1.8f,
             Intelligence = 7,
         });

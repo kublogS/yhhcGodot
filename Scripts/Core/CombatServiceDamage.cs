@@ -61,9 +61,18 @@ public static partial class CombatService
         var attackerType = TypeSystem.PrimaryType(attacker);
         var critEnabled = true;
 
+        // Bonuses are summed once and applied together at the end instead of
+        // each multiplying the running damage in turn: sequential multiplication
+        // (x1.2 * x1.2 * x1.5 = x2.16) compounds far more aggressively than the
+        // nominal percentages suggest, which let stacked bonuses roughly triple
+        // a move's base damage and produce one-shot kills. Summing first
+        // (0.2 + 0.2 + 0.5 = x1.9) keeps single-bonus hits identical while
+        // taming the worst-case multi-bonus spikes.
+        var bonusSum = 0f;
+
         if (tags.AttackType is not null && defenderType is not null && TypeSystem.IsWeak(defenderType, tags.AttackType))
         {
-            damage += damage * ModFloat(mods, "weakness_bonus", 0.5f);
+            bonusSum += ModFloat(mods, "weakness_bonus", 0.5f);
             tags.Weak = true;
             if (ModBool(mods, "disable_crit_on_weakness", true))
             {
@@ -84,12 +93,12 @@ public static partial class CombatService
             {
                 if (attackFam == defendFam)
                 {
-                    damage += damage * ModFloat(mods, "same_family_penalty", -0.2f);
+                    bonusSum += ModFloat(mods, "same_family_penalty", -0.2f);
                     tags.SameFamily = true;
                 }
                 else if (TypeSystem.FamiliesAreEnemy(attackFam, defendFam))
                 {
-                    damage += damage * ModFloat(mods, "enemy_family_bonus", 0.2f);
+                    bonusSum += ModFloat(mods, "enemy_family_bonus", 0.2f);
                     tags.EnemyFamily = true;
                 }
             }
@@ -97,15 +106,17 @@ public static partial class CombatService
 
         if (tags.AttackType is not null && attackerType is not null && tags.AttackType == attackerType)
         {
-            damage += damage * ModFloat(mods, "stab_bonus", 0.2f);
+            bonusSum += ModFloat(mods, "stab_bonus", 0.2f);
             tags.Stab = true;
         }
 
         if (critEnabled && RollCrit(attacker, rng))
         {
-            damage += damage * ModFloat(mods, "crit_bonus", 0.5f);
+            bonusSum += ModFloat(mods, "crit_bonus", 0.5f);
             tags.Crit = true;
         }
+
+        damage *= MathF.Max(0f, 1f + bonusSum);
 
         return (Math.Max(0, (int)MathF.Round(damage)), tags);
     }

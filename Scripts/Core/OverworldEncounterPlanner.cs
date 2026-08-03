@@ -31,7 +31,7 @@ public static class OverworldEncounterPlanner
         foreach (var candidate in nearby)
         {
             plan.ConsumedEnemies.Add(candidate.Enemy);
-            if (plan.ActiveEnemies.Count < 4)
+            if (plan.ActiveEnemies.Count < 3)
             {
                 plan.ActiveEnemies.Add(candidate.Enemy.ToBattleCharacter(rng));
                 continue;

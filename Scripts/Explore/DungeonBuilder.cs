@@ -111,7 +111,14 @@ public static class DungeonBuilder
         AddDoorPart(root, material, new Vector3(0.44f, 4.8f, 0.34f), pos + new Vector3(-1.24f, 2.4f, 0.08f));
         AddDoorPart(root, material, new Vector3(0.44f, 4.8f, 0.34f), pos + new Vector3(1.24f, 2.4f, 0.08f));
         AddDoorPart(root, material, new Vector3(2.84f, 0.44f, 0.34f), pos + new Vector3(0f, 4.68f, 0.08f));
-        AddDoorPart(root, material, new Vector3(2.16f, 4.04f, 0.14f), pos + new Vector3(0f, 1.98f, -0.06f));
+        AddExitPortalPanel(root, pos + new Vector3(0f, 1.98f, -0.06f), new Vector2(2.16f, 4.04f));
+    }
+
+    private static void AddExitPortalPanel(Node3D root, Vector3 position, Vector2 size)
+    {
+        var panel = PortalVisualFactory.Create(size);
+        panel.Position = position;
+        root.AddChild(panel);
     }
 
     private static void AddSaveMarker(Node3D root, Vector3 pos, Material material)

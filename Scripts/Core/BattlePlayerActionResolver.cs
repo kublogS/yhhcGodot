@@ -93,7 +93,7 @@ internal static class BattlePlayerActionResolver
             var typeTag = tags.AttackType is null ? string.Empty : $" ({tags.AttackType})";
             if (dealt > 0)
             {
-                CombatService.PushEvent(outcome, CombatEventType.DamageDealt, $"{target.Name} subisce {dealt}{typeTag}{CombatService.FormatTags(tags)}.", sourceId: CombatService.PlayerActorId, targetId: targetId, targetSlot: targetSlot, amount: dealt);
+                CombatService.PushEvent(outcome, CombatEventType.DamageDealt, $"{target.Name} subisce {dealt}{typeTag}{CombatService.FormatTags(tags)}.", sourceId: CombatService.PlayerActorId, targetId: targetId, targetSlot: targetSlot, amount: dealt, metadata: CombatService.BuildTagMetadata(tags));
                 continue;
             }
 

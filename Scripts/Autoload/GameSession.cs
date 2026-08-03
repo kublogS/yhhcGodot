@@ -51,7 +51,7 @@ public partial class GameSession : Node, INewGameSessionContext, IRewardSessionC
         PlayerYawRadians = 0f;
     }
 
-    public void StartEncounterWithEnemy(OverworldEnemyModel enemy, float reinforcementRadius = 10f)
+    public void StartEncounterWithEnemy(OverworldEnemyModel enemy, float reinforcementRadius = 5f)
     {
         if (State is null)
         {
@@ -77,6 +77,7 @@ public partial class GameSession : Node, INewGameSessionContext, IRewardSessionC
         BattleStateService.BeginEncounter(State, enemies, queued);
         LastEncounterContext = context;
         LastBattleLog.Clear();
+        BattleAnalyticsLog.BeginBattle(State, context);
     }
 
     public string AddReinforcement(CharacterModel enemy)

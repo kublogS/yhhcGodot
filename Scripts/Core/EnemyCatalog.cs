@@ -27,17 +27,17 @@ public static class EnemyCatalog
 
     public static readonly List<EnemySpec> Mobs = new()
     {
-        new EnemySpec { Name = "Goblin", Kind = "Mob", Hp = 18, Forza = 4, Magia = 1, Difesa = 1, Agilita = 5, Fortuna = 3, Intelligence = 3, Fede = 2, Exp = 6, Soli = 5, Sprite = "goblin", Types = new List<string> { "marziale" } },
-        new EnemySpec { Name = "Orco", Kind = "Mob", Hp = 24, Forza = 6, Magia = 1, Difesa = 2, Agilita = 3, Fortuna = 2, Intelligence = 2, Fede = 1, Exp = 9, Soli = 8, Sprite = "orco", Types = new List<string> { "marziale" } },
-        new EnemySpec { Name = "Scheletro", Kind = "Mob", Hp = 20, Forza = 5, Magia = 2, Difesa = 2, Agilita = 4, Fortuna = 4, Intelligence = 4, Fede = 3, Exp = 8, Soli = 7, Sprite = "scheletro", Types = new List<string> { "freddo" } },
-        new EnemySpec { Name = "Slime", Kind = "Mob", Hp = 16, Forza = 3, Magia = 1, Difesa = 1, Agilita = 2, Fortuna = 5, Intelligence = 1, Fede = 1, Exp = 5, Soli = 4, Sprite = "slime", Types = new List<string> { "acqua" } },
-        new EnemySpec { Name = "Bandito", Kind = "Mob", Hp = 22, Forza = 5, Magia = 1, Difesa = 1, Agilita = 6, Fortuna = 2, Intelligence = 5, Fede = 2, Exp = 7, Soli = 10, Sprite = "bandito", Types = new List<string> { "sparo" } },
-        new EnemySpec { Name = "Stregone", Kind = "Mob", Hp = 18, Forza = 2, Magia = 6, Difesa = 1, Agilita = 4, Fortuna = 4, Intelligence = 8, Fede = 6, Exp = 10, Soli = 9, Sprite = "stregone", Types = new List<string> { "fuoco" } },
+        new EnemySpec { Name = "Goblin", Kind = "Mob", Hp = 14, Forza = 4, Magia = 1, Difesa = 0, Agilita = 5, Fortuna = 3, Intelligence = 3, Fede = 2, Exp = 6, Soli = 5, Sprite = "goblin", Types = new List<string> { "marziale" } },
+        new EnemySpec { Name = "Orco", Kind = "Mob", Hp = 19, Forza = 6, Magia = 1, Difesa = 1, Agilita = 3, Fortuna = 2, Intelligence = 2, Fede = 1, Exp = 9, Soli = 8, Sprite = "orco", Types = new List<string> { "marziale" } },
+        new EnemySpec { Name = "Scheletro", Kind = "Mob", Hp = 16, Forza = 5, Magia = 2, Difesa = 1, Agilita = 4, Fortuna = 4, Intelligence = 4, Fede = 3, Exp = 8, Soli = 7, Sprite = "scheletro", Types = new List<string> { "freddo" } },
+        new EnemySpec { Name = "Slime", Kind = "Mob", Hp = 13, Forza = 3, Magia = 1, Difesa = 0, Agilita = 2, Fortuna = 5, Intelligence = 1, Fede = 1, Exp = 5, Soli = 4, Sprite = "slime", Types = new List<string> { "acqua" } },
+        new EnemySpec { Name = "Bandito", Kind = "Mob", Hp = 18, Forza = 5, Magia = 1, Difesa = 0, Agilita = 6, Fortuna = 2, Intelligence = 5, Fede = 2, Exp = 7, Soli = 10, Sprite = "bandito", Types = new List<string> { "sparo" } },
+        new EnemySpec { Name = "Stregone", Kind = "Mob", Hp = 14, Forza = 2, Magia = 6, Difesa = 0, Agilita = 4, Fortuna = 4, Intelligence = 8, Fede = 6, Exp = 10, Soli = 9, Sprite = "stregone", Types = new List<string> { "fuoco" } },
     };
 
     public static CharacterModel EnemyFromSpec(EnemySpec spec, GameRng rng, float mult = 1f, string namePrefix = "", string? kindOverride = null)
     {
-        var hp = Math.Max(1, (int)MathF.Round(spec.Hp * mult) + 70);
+        var hp = Math.Max(1, (int)MathF.Round(spec.Hp * mult) + 25);
         var intel = Math.Max(0, (int)MathF.Round(spec.Intelligence * mult));
         var fede = Math.Max(0, (int)MathF.Round(spec.Fede * mult));
         var level = Math.Max(1, (int)MathF.Round((Math.Max(0.25f, mult) - 1f) / 0.25f) + 1);
