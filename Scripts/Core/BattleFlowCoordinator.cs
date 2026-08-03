@@ -3,10 +3,12 @@ using System.Collections.Generic;
 public sealed class BattleFlowCoordinator
 {
     private readonly IBattleSessionContext _session;
+    private readonly IBattleAnalyticsSink _analytics;
 
-    public BattleFlowCoordinator(IBattleSessionContext session)
+    public BattleFlowCoordinator(IBattleSessionContext session, IBattleAnalyticsSink? analytics = null)
     {
         _session = session;
+        _analytics = analytics ?? NullBattleAnalyticsSink.Instance;
     }
 
     public BattleFlowResult ExecuteTurn(CombatTurnRequest request)
@@ -23,16 +25,19 @@ public sealed class BattleFlowCoordinator
         var outcome = CombatService.CombatTurn(state, request);
         result.LogLines.AddRange(outcome.LogLines);
         result.Events.AddRange(outcome.Events);
+        _analytics.RecordTurn(state, request, outcome);
 
         if (outcome.PlayerDefeated)
         {
             AppendSystemEvent(result, "Game Over.");
+            _analytics.EndBattle(state, "Sconfitta");
             result.Outcome = BattleFlowOutcome.GoToMainMenu;
             return result;
         }
 
         if (outcome.Fled)
         {
+            _analytics.EndBattle(state, "Fuga");
             result.Outcome = BattleFlowOutcome.ReturnToExplore;
             return result;
         }
@@ -41,6 +46,7 @@ public sealed class BattleFlowCoordinator
         {
             var rewards = _session.FinalizeBattleRewards();
             AppendSystemEvent(result, $"Ricompense: Soli {rewards.Soli}, Oggetti {rewards.Items}, Mosse {rewards.Tokens}");
+            _analytics.EndBattle(state, "Vittoria");
             result.Outcome = BattleFlowOutcome.OpenReward;
             return result;
         }

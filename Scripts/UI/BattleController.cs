@@ -27,7 +27,7 @@ public partial class BattleController : Control
     {
         _session = GetNode<GameSession>("/root/GameSession");
         Theme = GameUiThemeFactory.GetOrCreate();
-        _flow = new BattleFlowCoordinator(_session);
+        _flow = new BattleFlowCoordinator(_session, new BattleAnalyticsLogSink());
         _log = GetNode<RichTextLabel>("Root/CombatRow/HudPanel/HudRoot/TopRightLog");
         _backdrop = GetNode<TextureRect>("Backdrop");
         _backdropFallback = GetNode<ColorRect>("BackdropFallback");
