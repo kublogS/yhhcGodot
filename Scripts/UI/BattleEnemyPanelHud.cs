@@ -142,7 +142,7 @@ public sealed class BattleEnemyPanelHud
             _cards[i].AddThemeStyleboxOverride("panel", _cardStyle);
             _nameLabels[i].Modulate = new Color(0.95f, 0.97f, 1f);
             _hpLabels[i].Modulate = new Color(0.84f, 0.96f, 0.9f);
-            _sprites[i].ExpandMode = TextureRect.ExpandModeEnum.FitWidthProportional;
+            _sprites[i].ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
             _sprites[i].StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
             _hpBars[i].ShowPercentage = false;
             _hpBars[i].AddThemeStyleboxOverride("fill", new StyleBoxFlat

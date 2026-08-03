@@ -82,7 +82,13 @@ public partial class DisplaySettingsService : Node
             return;
         }
 
-        var screen = GetWindow().CurrentScreen;
+        var window = GetWindow();
+        if (window is null)
+        {
+            return;
+        }
+
+        var screen = window.CurrentScreen;
         if (screen != _lastScreen)
         {
             ApplyAutomaticResolution();

@@ -56,7 +56,14 @@ public sealed class BattleOverlayViewState
 
     public void AppendLog(string text)
     {
-        _log.Text = string.IsNullOrWhiteSpace(text) ? string.Empty : $"[right]{text}[/right]";
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            _log.Text = string.Empty;
+            return;
+        }
+
+        _log.Text += $"[right]{text}[/right]\n";
+        _log.ScrollToLine(_log.GetLineCount());
     }
 
     public void SetButtonsEnabled(bool enabled)
