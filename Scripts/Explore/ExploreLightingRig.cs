@@ -43,6 +43,15 @@ public static class ExploreLightingRig
             AmbientLightColor = new Color(0.74f, 0.82f, 0.9f),
             AmbientLightEnergy = 1.25f,
             AmbientLightSkyContribution = 0.1f,
+            // Soft halo around bright emissive sources (the torch flame) -
+            // Ico, the visual reference for the torch, was one of the first
+            // PS2-era games to use bloom, which is why its light sources read
+            // as overlapping glow rather than sharp points.
+            GlowEnabled = true,
+            GlowIntensity = 0.9f,
+            GlowStrength = 1.1f,
+            GlowBloom = 0.12f,
+            GlowHdrThreshold = 1.0f,
         };
 
         rig.AddChild(new WorldEnvironment
