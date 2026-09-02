@@ -19,5 +19,11 @@ public partial class MainMenuController : Control
 
         GetNode<Button>("Center/VBox/PartiteButton").Pressed += () => _sceneRouter.GoToSavesMenu();
         GetNode<Button>("Center/VBox/EsciButton").Pressed += () => GetTree().Quit();
+        MusicService.Instance?.FadeInMenuTheme();
+    }
+
+    public override void _ExitTree()
+    {
+        MusicService.Instance?.FadeOutAndStop();
     }
 }

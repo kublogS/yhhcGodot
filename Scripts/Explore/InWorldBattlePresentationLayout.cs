@@ -72,6 +72,19 @@ public static class InWorldBattlePresentationLayout
         return string.IsNullOrWhiteSpace(enemy.BattleActorId) ? $"enemy:{slot}:{enemy.Name}" : enemy.BattleActorId;
     }
 
+    public static string? ResolveEnemySprite(GameState state, string actorId)
+    {
+        for (var i = 0; i < state.Enemies.Count; i++)
+        {
+            if (ResolveEnemyActorId(state.Enemies[i], i) == actorId)
+            {
+                return state.Enemies[i].Sprite;
+            }
+        }
+
+        return null;
+    }
+
     private static void PlaceParticipant(InWorldBattleParticipant participant, Vector3 anchor, Vector3 lookTarget)
     {
         var yaw = Mathf.Atan2((lookTarget - anchor).X, (lookTarget - anchor).Z);

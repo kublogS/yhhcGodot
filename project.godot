@@ -27,6 +27,7 @@ GameSession="*res://Scripts/Autoload/GameSession.cs"
 SaveService="*res://Scripts/Autoload/SaveService.cs"
 Database="*res://Scripts/Autoload/Database.cs"
 SceneRouter="*res://Scripts/Autoload/SceneRouter.cs"
+MusicService="*res://Scripts/Autoload/MusicService.cs"
 
 [display]
 

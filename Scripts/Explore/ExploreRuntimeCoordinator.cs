@@ -167,6 +167,8 @@ public sealed class ExploreRuntimeCoordinator
         _transitions.SpawnPortalEntryMinZ = layout.PortalEntryMinZ;
         _transitions.SpawnPortalEntryHalfWidth = layout.PortalEntryHalfWidth;
         _transitions.SpawnPortalTransitionLock = false;
+        MusicService.Instance?.FadeInIndiceTheme();
+        MusicService.Instance?.StopOverworldAmbient();
     }
 
     private void BuildDungeonRuntime()
@@ -179,6 +181,8 @@ public sealed class ExploreRuntimeCoordinator
         _enemyRuntime = build.EnemyRuntime;
         _enemyAgents.Clear();
         _enemyAgents.AddRange(build.EnemyAgents);
+        MusicService.Instance?.FadeOutAndStop();
+        MusicService.Instance?.StartOverworldAmbient();
     }
 
     private void SyncEncounterWorldAfterEncounter()

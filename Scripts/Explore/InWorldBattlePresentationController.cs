@@ -7,6 +7,7 @@ public sealed class InWorldBattlePresentationController
     private readonly Node3D _root;
     private readonly PlayerController _player;
     private readonly InWorldBattleCameraRig _cameraRig;
+    private readonly InWorldBattleAudio _audio;
     private readonly Dictionary<string, InWorldBattleParticipant> _participants = new();
     private readonly Dictionary<EnemyAgent, bool> _enemyVisibility = new();
     private readonly Dictionary<EnemyAgent, Node.ProcessModeEnum> _enemyProcessModes = new();
@@ -19,6 +20,7 @@ public sealed class InWorldBattlePresentationController
         _root = root;
         _player = player;
         _cameraRig = new InWorldBattleCameraRig(battleCamera, player.GetViewCamera());
+        _audio = new InWorldBattleAudio(root);
     }
 
     public bool IsActive => _root.Visible;
@@ -109,9 +111,22 @@ public sealed class InWorldBattlePresentationController
         switch (battleEvent.EventType)
         {
             case CombatEventType.ActionUsed when source is not null:
+                if (state is not null && battleEvent.SourceId != CombatService.PlayerActorId)
+                {
+                    _audio.PlayGrunt(source, InWorldBattlePresentationLayout.ResolveEnemySprite(state, battleEvent.SourceId!));
+                }
+
                 await InWorldBattlePresentationPlayback.DashAsync(_root, source, target, _battleCenter);
                 break;
             case CombatEventType.DamageDealt when target is not null:
+                _audio.PlayHitImpact(target);
+                if (battleEvent.SourceId == CombatService.PlayerActorId
+                    && battleEvent.Metadata.TryGetValue("crit", out var critFlag)
+                    && critFlag == bool.TrueString)
+                {
+                    _audio.PlayCriticalHit();
+                }
+
                 await InWorldBattlePresentationPlayback.ImpactAsync(_root, target, battleEvent.Amount);
                 break;
             case CombatEventType.DefendActivated when source is not null:

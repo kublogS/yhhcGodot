@@ -10,6 +10,7 @@ public partial class RewardController : Control
     private RewardFlowCoordinator _flow = null!;
     private HBoxContainer _replaceRow = null!;
     private readonly List<Button> _replaceButtons = new();
+    private AudioStreamPlayer _jinglePlayer = null!;
     private bool _embeddedMode;
 
     public event Action<PersistResult>? PersistResolved;
@@ -24,6 +25,8 @@ public partial class RewardController : Control
         GetNode<Button>("Root/Buttons/Money").Pressed += () => AppendAction(_flow.ClaimMoney());
         GetNode<Button>("Root/Buttons/Items").Pressed += () => AppendAction(_flow.ClaimItems());
         GetNode<Button>("Root/Buttons/Continue").Pressed += OnContinue;
+        _jinglePlayer = new AudioStreamPlayer { Name = "RewardJingle" };
+        AddChild(_jinglePlayer);
         BuildReplaceRow();
         if (Visible)
         {
@@ -65,6 +68,8 @@ public partial class RewardController : Control
         Visible = true;
         ProcessMode = ProcessModeEnum.Inherit;
         Input.MouseMode = Input.MouseModeEnum.Visible;
+        _jinglePlayer.Stream = BattleSfxLibrary.GetVictoryJingle();
+        _jinglePlayer.Play();
         RefreshSummary();
         if (_replaceButtons.Count > 0)
         {
