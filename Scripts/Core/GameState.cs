@@ -17,6 +17,7 @@ public sealed class GameState
     public bool BattleClaimedItems { get; set; }
     public List<CharacterModel> BattleDefeatedEnemies { get; set; } = new();
     public int BattleStealTokens { get; set; }
+    public EnemyPlayerIntel PlayerIntel { get; set; } = new();
 
     public bool BattleHasCapacity() => Enemies.Count < 4;
 
@@ -68,6 +69,7 @@ public sealed class GameState
         BattleClaimedItems = false;
         BattleDefeatedEnemies = new List<CharacterModel>();
         BattleStealTokens = 0;
+        PlayerIntel = new EnemyPlayerIntel();
     }
 
     public CharacterModel RespawnEnemy()

@@ -1,15 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 public static partial class CombatService
 {
-    internal static MoveModel? PickCastableEnemyMove(CharacterModel enemy, GameState state)
-    {
-        var usable = enemy.Moves.Where(m => m is not null && CanCastMove(enemy, m!)).ToList();
-        return usable.Count == 0 ? null : usable[state.Rng.NextInt(0, usable.Count - 1)];
-    }
-
     internal static bool CanCastMove(CharacterModel owner, MoveModel move)
     {
         var amount = move.CostAmount ?? 0;

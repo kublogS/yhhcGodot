@@ -26,7 +26,13 @@ public static partial class CombatService
         return Math.Clamp(50 + (p - e) * 3, 10, 90);
     }
 
-    public static (int Damage, DamageTags Tags) ComputeMoveDamage(CharacterModel attacker, CharacterModel defender, MoveModel move, GameRng rng, bool ignoreSpecialRules = false)
+    public static (int Damage, DamageTags Tags) ComputeMoveDamage(
+        CharacterModel attacker,
+        CharacterModel defender,
+        MoveModel move,
+        GameRng rng,
+        bool ignoreSpecialRules = false,
+        string? believedDefenderTypeOverride = null)
     {
         if (move.IsBasicAttack)
         {
@@ -57,7 +63,11 @@ public static partial class CombatService
         }
 
         var mods = cfg.DamageModifiers;
-        var defenderType = TypeSystem.PrimaryType(defender);
+        // Real damage resolution (override left null) always uses the true
+        // type. Only the enemy's own decision-making simulation
+        // (EnemyCombatAi) supplies a belief here, so it never plans around
+        // information it hasn't actually earned in this fight.
+        var defenderType = believedDefenderTypeOverride ?? TypeSystem.PrimaryType(defender);
         var attackerType = TypeSystem.PrimaryType(attacker);
         var critEnabled = true;
 

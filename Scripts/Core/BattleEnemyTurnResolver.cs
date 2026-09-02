@@ -7,7 +7,7 @@ internal static class BattleEnemyTurnResolver
         var player = state.Player;
         var enemySlot = state.Enemies.IndexOf(enemy);
         var sourceId = CombatService.EnemyActorId(enemy, enemySlot);
-        var enemyMove = CombatService.PickCastableEnemyMove(enemy, state);
+        var enemyMove = EnemyCombatAi.ChooseBestMove(enemy, player, state);
         if (enemyMove is null)
         {
             CombatService.PushEvent(outcome, CombatEventType.ActionUsed, $"{enemy.Name} usa Attacco!", sourceId: sourceId, sourceSlot: enemySlot, targetId: CombatService.PlayerActorId);
@@ -29,6 +29,10 @@ internal static class BattleEnemyTurnResolver
         CombatService.ApplyMoveCost(enemy, enemyMove);
         CombatService.PushEvent(outcome, CombatEventType.ActionUsed, $"{enemy.Name} usa {enemyMove.Name}.", sourceId: sourceId, sourceSlot: enemySlot, targetId: CombatService.PlayerActorId);
         var (damageByMove, tags) = CombatService.ComputeMoveDamage(enemy, player, enemyMove, state.Rng, player.Defending);
+        // Record what actually happened (the ground truth tags), not what
+        // the enemy predicted - this is how the dungeon's enemies gradually
+        // work out the player's type over the course of the fight.
+        state.PlayerIntel.RecordObservation(tags);
         var preDefendDamage = damageByMove;
         if (player.Defending)
         {
