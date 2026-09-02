@@ -5,19 +5,15 @@ public static partial class OverworldAI
 {
     public const float WakeDurationSec = 5f;
     public const float StuckTimeSec = 1.5f;
-    public const float BehaviorAlertDurationSec = 1.5f;
     public const int SmartIntelligenceMin = 6;
     public const int LowIntelligenceMax = 3;
+    public const float SightMemoryForgetSec = 20f;
 
     public static void TickEnemyRuntime(OverworldEnemyModel enemy, float dt)
     {
         if (enemy.WakeTimer > 0f)
         {
             enemy.WakeTimer = Math.Max(0f, enemy.WakeTimer - dt);
-        }
-        if (enemy.BehaviorAlertTimer > 0f)
-        {
-            enemy.BehaviorAlertTimer = Math.Max(0f, enemy.BehaviorAlertTimer - dt);
         }
 
         if (enemy.SpeechTimer > 0f)
@@ -28,24 +24,49 @@ public static partial class OverworldAI
                 enemy.SpeechText = null;
             }
         }
+
+        if (float.IsFinite(enemy.LastKnownPlayerAgeSec))
+        {
+            enemy.LastKnownPlayerAgeSec += dt;
+        }
     }
 
     public static (float VxPerSec, float VyPerSec, bool Chasing) ComputeVelocity(
         OverworldEnemyModel enemy,
         float playerX,
         float playerY,
-        int[,] grid,
+        DungeonData dungeon,
         float alertTimer)
     {
+        var grid = dungeon.Grid;
         var enemyPos = enemy.Position;
-        var dist = MathF.Sqrt((playerX - enemyPos.X) * (playerX - enemyPos.X) + (playerY - enemyPos.Y) * (playerY - enemyPos.Y));
+        var visible = HasLineOfSight(grid, enemyPos.X, enemyPos.Y, playerX, playerY);
+        if (visible)
+        {
+            enemy.LastKnownPlayerPosition = new Vector2(playerX, playerY);
+            enemy.LastKnownPlayerAgeSec = 0f;
+        }
+        else if (enemy.LastKnownPlayerAgeSec > SightMemoryForgetSec)
+        {
+            enemy.LastKnownPlayerPosition = null;
+        }
+
+        // Paranoico never chases what it directly sees - it hunts by
+        // patrolling rooms and by what other enemies tell it (see
+        // OverworldAIPatrol.cs), so it takes a completely separate movement
+        // path instead of the "chase the player's live position" logic below.
+        if (enemy.BehaviorKind == OverworldBehavior.Paranoico)
+        {
+            return ComputeParanoidVelocity(enemy, dungeon);
+        }
+
+        var dist = MathF.Sqrt(((playerX - enemyPos.X) * (playerX - enemyPos.X)) + ((playerY - enemyPos.Y) * (playerY - enemyPos.Y)));
         if (dist <= 0.2f)
         {
             return (0f, 0f, false);
         }
 
-        var visible = HasLineOfSight(grid, enemyPos.X, enemyPos.Y, playerX, playerY);
-        if (!DecideChase(enemy, visible, alertTimer))
+        if (!DecideChase(enemy, visible))
         {
             return (0f, 0f, false);
         }
@@ -86,17 +107,23 @@ public static partial class OverworldAI
         }
     }
 
-    private static bool DecideChase(OverworldEnemyModel enemy, bool playerVisible, float alertTimer)
+    // Whether the enemy actively chases the player's live, currently-visible
+    // position via the overworld's own line of sight (not via reinforcement
+    // or a shared/patrol lead - those are separate triggers).
+    private static bool DecideChase(OverworldEnemyModel enemy, bool playerVisible)
     {
         return enemy.BehaviorKind switch
         {
-            OverworldBehavior.Pacifista => false,
-            OverworldBehavior.Tranquillo => DecideCalmChase(enemy, playerVisible, alertTimer),
-            OverworldBehavior.Sospetto => DecideSuspiciousChase(enemy, playerVisible),
-            _ => true,
+            OverworldBehavior.Allerta => playerVisible,
+            _ => false,
         };
     }
 
+    // Whether touching/being touched by the player should start a battle.
+    // Normale never hunts from a distance (see DecideChase), but still
+    // fights if the player walks right into it - it only gets pulled into a
+    // fight it merely *witnesses* from afar via the separate reinforcement
+    // path in OverworldEncounterPlanner, not through this direct-contact check.
     public static bool ShouldStartEncounterOnContact(OverworldEnemyModel enemy, bool chasing, float alertTimer)
     {
         if (!enemy.Active)
@@ -106,30 +133,8 @@ public static partial class OverworldAI
 
         return enemy.BehaviorKind switch
         {
-            OverworldBehavior.Pacifista => false,
-            OverworldBehavior.Tranquillo => chasing || alertTimer > 0f || enemy.BehaviorAlertTimer > 0f,
-            OverworldBehavior.Sospetto => chasing || enemy.Alerted,
+            OverworldBehavior.Pacifico => false,
             _ => true,
         };
-    }
-
-    private static bool DecideCalmChase(OverworldEnemyModel enemy, bool playerVisible, float alertTimer)
-    {
-        if (playerVisible)
-        {
-            enemy.BehaviorAlertTimer = MathF.Max(enemy.BehaviorAlertTimer, BehaviorAlertDurationSec);
-        }
-
-        return playerVisible && (alertTimer > 0f || enemy.BehaviorAlertTimer > 0f);
-    }
-
-    private static bool DecideSuspiciousChase(OverworldEnemyModel enemy, bool playerVisible)
-    {
-        if (playerVisible)
-        {
-            enemy.Alerted = true;
-        }
-
-        return enemy.Alerted;
     }
 }

@@ -65,7 +65,7 @@ public partial class EnemyAgent : CharacterBody3D
                 Model,
                 _player.GlobalPosition.X,
                 _player.GlobalPosition.Z,
-                _dungeon.Grid,
+                _dungeon,
                 _alertTimer);
             Velocity = new Vector3(decision.VxPerSec, 0f, decision.VyPerSec);
             chasing = decision.Chasing;

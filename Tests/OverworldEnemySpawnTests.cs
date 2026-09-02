@@ -29,4 +29,28 @@ public static class OverworldEnemySpawnTests
             || left.Speed != right.Speed).Any(diff => diff);
         assert.True(anyDifference, "changing the procedural seed should affect overworld enemy roster");
     }
+
+    public static void OneParanoicoPerFloorAndAllertaMajority(TestAssert assert)
+    {
+        const int seed = 778899;
+        const int floor = 5;
+        var dungeon = DungeonGenerator.Generate(seed, floor);
+        var spawns = OverworldEnemySpawnFactory.BuildForDungeon(dungeon, seed)
+            .Where(e => !e.IsFloorBoss)
+            .ToList();
+
+        var paranoicoCount = spawns.Count(e => e.BehaviorKind == OverworldBehavior.Paranoico);
+        var normaleCount = spawns.Count(e => e.BehaviorKind == OverworldBehavior.Normale);
+        var allertaCount = spawns.Count(e => e.BehaviorKind == OverworldBehavior.Allerta);
+        var pacificoCount = spawns.Count(e => e.BehaviorKind == OverworldBehavior.Pacifico);
+
+        assert.Equal(1, paranoicoCount, "exactly one paranoico should spawn per floor");
+        assert.True(normaleCount + allertaCount + pacificoCount == spawns.Count - 1, "every non-paranoico spawn must fall into normale/allerta/pacifico");
+        if (spawns.Count >= 11)
+        {
+            assert.True(allertaCount >= normaleCount && allertaCount >= pacificoCount, "allerta should be the plurality behavior (1 normale every 2 allerta) once there are enough spawns for a full ratio cycle");
+            assert.True(normaleCount > 0, "normale should appear once there are enough spawns for a full ratio cycle");
+            assert.True(pacificoCount > 0, "pacifico should appear once there are enough spawns for a full ratio cycle");
+        }
+    }
 }

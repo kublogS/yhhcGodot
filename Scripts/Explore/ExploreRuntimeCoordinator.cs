@@ -132,7 +132,7 @@ public sealed class ExploreRuntimeCoordinator
         {
             return;
         }
-        _enemyRuntime?.Tick((float)deltaSeconds, _player.GlobalPosition, _session.CurrentDungeon.Grid, _session.OverworldEnemies);
+        _enemyRuntime?.Tick((float)deltaSeconds, _player.GlobalPosition, _session.CurrentDungeon, _session.OverworldEnemies);
         _map.UpdateFromDungeon(_session.CurrentDungeon, _player.GlobalPosition, _enemyAgents);
         if (ExploreModalFlow.IsModalActive(_pause, _manual, _map))
         {

@@ -1,38 +1,165 @@
 using System.Collections.Generic;
+using Godot;
 
 public static class OverworldAiParityTests
 {
-    public static void SuspiciousAlertPersistence(TestAssert assert)
+    private static DungeonData MakeOpenDungeon(int width, int height)
     {
+        var grid = new int[height, width];
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                grid[y, x] = (int)TileType.Floor;
+            }
+        }
+
+        return new DungeonData { Grid = grid };
+    }
+
+    public static void PacificoNeverEngages(TestAssert assert)
+    {
+        var dungeon = MakeOpenDungeon(5, 5);
         var enemy = new OverworldEnemyModel
         {
-            EnemyId = "susp_1",
-            BehaviorKind = OverworldBehavior.Sospetto,
-            Intelligence = 2,
+            EnemyId = "pac_1",
+            BehaviorKind = OverworldBehavior.Pacifico,
+            Intelligence = 4,
             Speed = 1.5f,
             X = 1.5f,
             Y = 1.5f,
-            Alerted = false,
         };
 
-        var openGrid = new[,]
-        {
-            { 0, 0, 0 },
-            { 0, 0, 0 },
-            { 0, 0, 0 },
-        };
-        var first = OverworldAI.ComputeVelocity(enemy, playerX: 2.5f, playerY: 1.5f, openGrid, alertTimer: 0f);
-        assert.True(first.Chasing, "sospetto should chase when player is visible");
-        assert.True(enemy.Alerted, "sospetto should persist alert flag after seeing player");
+        var decision = OverworldAI.ComputeVelocity(enemy, playerX: 2.5f, playerY: 1.5f, dungeon, alertTimer: 5f);
+        assert.True(!decision.Chasing, "pacifico must never chase, even with clear line of sight");
+        assert.True(!OverworldAI.ShouldStartEncounterOnContact(enemy, chasing: true, alertTimer: 5f), "pacifico must never start an encounter on contact");
+    }
 
-        var blockedGrid = new[,]
+    public static void AllertaChasesOnlyWhileVisible(TestAssert assert)
+    {
+        var dungeon = MakeOpenDungeon(6, 3);
+        var enemy = new OverworldEnemyModel
         {
-            { 0, 1, 0 },
-            { 0, 1, 0 },
-            { 0, 1, 0 },
+            EnemyId = "allerta_1",
+            BehaviorKind = OverworldBehavior.Allerta,
+            Intelligence = 4,
+            Speed = 1.5f,
+            X = 1f,
+            Y = 1f,
         };
-        var second = OverworldAI.ComputeVelocity(enemy, playerX: 2.5f, playerY: 1.5f, blockedGrid, alertTimer: 0f);
-        assert.True(second.Chasing, "sospetto should keep chasing after LOS loss once alerted");
+
+        var visible = OverworldAI.ComputeVelocity(enemy, playerX: 9f, playerY: 1f, dungeon, alertTimer: 0f);
+        assert.True(visible.Chasing, "allerta should chase the instant it sees the player");
+
+        var wallGrid = new int[3, 6];
+        for (var y = 0; y < 3; y++)
+        {
+            for (var x = 0; x < 6; x++)
+            {
+                wallGrid[y, x] = x == 2 ? (int)TileType.Wall : (int)TileType.Floor;
+            }
+        }
+
+        var blockedDungeon = new DungeonData { Grid = wallGrid };
+        var blocked = OverworldAI.ComputeVelocity(enemy, playerX: 9f, playerY: 1f, blockedDungeon, alertTimer: 0f);
+        assert.True(!blocked.Chasing, "allerta should stop chasing once line of sight is actually blocked");
+    }
+
+    public static void NormaleOnlyEngagesAsReinforcement(TestAssert assert)
+    {
+        var dungeon = MakeOpenDungeon(5, 5);
+        var enemy = new OverworldEnemyModel
+        {
+            EnemyId = "norm_1",
+            BehaviorKind = OverworldBehavior.Normale,
+            Intelligence = 4,
+            Speed = 1.5f,
+            X = 1.5f,
+            Y = 1.5f,
+        };
+
+        var decision = OverworldAI.ComputeVelocity(enemy, playerX: 2.5f, playerY: 1.5f, dungeon, alertTimer: 0f);
+        assert.True(!decision.Chasing, "normale must not chase on its own line of sight");
+        assert.True(OverworldAI.ShouldStartEncounterOnContact(enemy, chasing: false, alertTimer: 0f), "normale should still fight if the player walks right into it");
+
+        var alerta = new OverworldEnemyModel { EnemyId = "ally_allerta", BehaviorKind = OverworldBehavior.Allerta, Active = true, X = 1.6f, Y = 1.5f };
+        var pacifico = new OverworldEnemyModel { EnemyId = "ally_pacifico", BehaviorKind = OverworldBehavior.Pacifico, Active = true, X = 1.4f, Y = 1.5f };
+        var paranoico = new OverworldEnemyModel { EnemyId = "ally_paranoico", BehaviorKind = OverworldBehavior.Paranoico, Active = true, X = 1.5f, Y = 1.6f };
+        var normaleAlly = new OverworldEnemyModel { EnemyId = "ally_normale", BehaviorKind = OverworldBehavior.Normale, Active = true, X = 1.5f, Y = 1.4f };
+        var others = new List<OverworldEnemyModel> { alerta, pacifico, paranoico, normaleAlly };
+
+        // Uses the pure selection helper (not Build/ToBattleCharacter, which
+        // reaches into the Database autoload and can't run outside a live
+        // Godot engine).
+        var reinforcements = OverworldEncounterPlanner.SelectReinforcements(enemy, others, reinforcementRadius: 10f);
+        var pulledIds = new List<string>();
+        foreach (var pulled in reinforcements)
+        {
+            pulledIds.Add(pulled.EnemyId);
+        }
+
+        assert.True(pulledIds.Contains("ally_allerta"), "allerta should be pulled in as reinforcement");
+        assert.True(pulledIds.Contains("ally_normale"), "normale should be pulled in as reinforcement");
+        assert.True(!pulledIds.Contains("ally_pacifico"), "pacifico should never be pulled in as reinforcement");
+        assert.True(!pulledIds.Contains("ally_paranoico"), "paranoico should never be pulled in as reinforcement");
+    }
+
+    public static void ParanoicoPatrolsInsteadOfChasing(TestAssert assert)
+    {
+        var dungeon = MakeOpenDungeon(20, 5);
+        dungeon.RoomBounds[1] = new Rect2I(0, 0, 5, 5);
+        dungeon.RoomBounds[2] = new Rect2I(15, 0, 5, 5);
+
+        var enemy = new OverworldEnemyModel
+        {
+            EnemyId = "para_1",
+            BehaviorKind = OverworldBehavior.Paranoico,
+            Intelligence = 7,
+            Speed = 1.5f,
+            X = 4f,
+            Y = 2f,
+        };
+
+        // Player is far outside the dungeon bounds - no line of sight, no
+        // lead - so the paranoico must fall back to patrolling a room.
+        var decision = OverworldAI.ComputeVelocity(enemy, playerX: 5000f, playerY: 5000f, dungeon, alertTimer: 0f);
+        assert.True(!decision.Chasing, "paranoico's own movement is never reported as a chase");
+        assert.True(enemy.PatrolTargetRoomId is not null, "paranoico should pick a room to search when it has no lead");
+
+        var firstTarget = enemy.PatrolTargetRoomId;
+        // Room 1 (0,0,5x5) centers on grid (2,2) -> world (4,4); move within
+        // arrival range of that exact point to simulate having walked there.
+        enemy.X = 3.8f;
+        enemy.Y = 3.7f;
+        OverworldAI.ComputeVelocity(enemy, playerX: 5000f, playerY: 5000f, dungeon, alertTimer: 0f);
+        assert.True(enemy.VisitedRoomIds.Contains(firstTarget!.Value), "arriving at the patrol target should mark it visited");
+    }
+
+    public static void ParanoicoAdoptsFreshestAllySighting(TestAssert assert)
+    {
+        var paranoico = new OverworldEnemyModel { EnemyId = "para_ask", BehaviorKind = OverworldBehavior.Paranoico, Active = true, X = 0f, Y = 0f };
+        var staleWitness = new OverworldEnemyModel
+        {
+            EnemyId = "stale",
+            Active = true,
+            X = 1f,
+            Y = 0f,
+            LastKnownPlayerPosition = new Vector2(9f, 9f),
+            LastKnownPlayerAgeSec = 30f,
+        };
+        var freshWitness = new OverworldEnemyModel
+        {
+            EnemyId = "fresh",
+            Active = true,
+            X = 1f,
+            Y = 1f,
+            LastKnownPlayerPosition = new Vector2(3f, 4f),
+            LastKnownPlayerAgeSec = 1f,
+        };
+
+        OverworldAI.ParanoidAskAround(paranoico, new List<OverworldEnemyModel> { staleWitness, freshWitness });
+
+        assert.True(paranoico.LastKnownPlayerPosition == new Vector2(3f, 4f), "paranoico should adopt the freshest in-range sighting, ignoring the stale one");
     }
 
     public static void WakeStuckAlly(TestAssert assert)
@@ -77,53 +204,5 @@ public static class OverworldAiParityTests
 
         var visible = OverworldAI.HasLineOfSight(blockedGrid, startX: 0f, startY: 2f, endX: 4f, endY: 2f);
         assert.True(!visible, "intact breakable should block line of sight");
-    }
-
-    public static void ContactBehaviorGate(TestAssert assert)
-    {
-        var baseEnemy = new OverworldEnemyModel { EnemyId = "gate", Active = true };
-
-        baseEnemy.BehaviorKind = OverworldBehavior.Pacifista;
-        assert.True(!OverworldAI.ShouldStartEncounterOnContact(baseEnemy, chasing: true, alertTimer: 5f), "pacifista must never auto-start encounter");
-
-        baseEnemy.BehaviorKind = OverworldBehavior.Tranquillo;
-        assert.True(!OverworldAI.ShouldStartEncounterOnContact(baseEnemy, chasing: false, alertTimer: 0f), "tranquillo should not engage without alert/chase");
-        assert.True(OverworldAI.ShouldStartEncounterOnContact(baseEnemy, chasing: false, alertTimer: 3f), "tranquillo should engage with valid alert");
-
-        baseEnemy.BehaviorKind = OverworldBehavior.Sospetto;
-        baseEnemy.Alerted = false;
-        assert.True(!OverworldAI.ShouldStartEncounterOnContact(baseEnemy, chasing: false, alertTimer: 0f), "sospetto should not engage if not alerted/chasing");
-        baseEnemy.Alerted = true;
-        assert.True(OverworldAI.ShouldStartEncounterOnContact(baseEnemy, chasing: false, alertTimer: 0f), "sospetto should engage if alerted");
-
-        baseEnemy.BehaviorKind = OverworldBehavior.Ansioso;
-        assert.True(OverworldAI.ShouldStartEncounterOnContact(baseEnemy, chasing: false, alertTimer: 0f), "ansioso should engage on contact");
-    }
-
-    public static void TranquilloVisibilityArmsLocalAlert(TestAssert assert)
-    {
-        var enemy = new OverworldEnemyModel
-        {
-            EnemyId = "calm_1",
-            BehaviorKind = OverworldBehavior.Tranquillo,
-            Intelligence = 4,
-            Speed = 1.2f,
-            X = 1.5f,
-            Y = 1.5f,
-        };
-
-        var openGrid = new[,]
-        {
-            { 0, 0, 0 },
-            { 0, 0, 0 },
-            { 0, 0, 0 },
-        };
-        var visible = OverworldAI.ComputeVelocity(enemy, playerX: 2.5f, playerY: 1.5f, openGrid, alertTimer: 0f);
-        assert.True(visible.Chasing, "tranquillo should chase while player is visible");
-        assert.True(enemy.BehaviorAlertTimer > 0f, "tranquillo should arm a local alert timer after seeing player");
-        assert.True(OverworldAI.ShouldStartEncounterOnContact(enemy, chasing: false, alertTimer: 0f), "tranquillo should permit contact during local alert");
-
-        OverworldAI.TickEnemyRuntime(enemy, OverworldAI.BehaviorAlertDurationSec + 0.1f);
-        assert.True(!OverworldAI.ShouldStartEncounterOnContact(enemy, chasing: false, alertTimer: 0f), "tranquillo local alert should expire");
     }
 }

@@ -22,25 +22,41 @@ public static class OverworldEncounterPlanner
         plan.ActiveEnemies.Add(primary.ToBattleCharacter(rng));
         plan.ConsumedEnemies.Add(primary);
 
-        var nearby = overworldEnemies
-            .Where(enemy => enemy.Active && !ReferenceEquals(enemy, primary))
-            .Select(enemy => (Enemy: enemy, Distance: enemy.XYDistanceTo(primary.Position)))
-            .Where(candidate => candidate.Distance <= reinforcementRadius)
-            .OrderBy(candidate => candidate.Distance);
-
-        foreach (var candidate in nearby)
+        foreach (var reinforcement in SelectReinforcements(primary, overworldEnemies, reinforcementRadius))
         {
-            plan.ConsumedEnemies.Add(candidate.Enemy);
+            plan.ConsumedEnemies.Add(reinforcement);
             if (plan.ActiveEnemies.Count < 3)
             {
-                plan.ActiveEnemies.Add(candidate.Enemy.ToBattleCharacter(rng));
+                plan.ActiveEnemies.Add(reinforcement.ToBattleCharacter(rng));
                 continue;
             }
 
-            plan.QueuedEnemies.Add(candidate.Enemy.ToBattleCharacter(rng));
+            plan.QueuedEnemies.Add(reinforcement.ToBattleCharacter(rng));
         }
 
         return plan;
+    }
+
+    // Split out from Build() so the "who counts as reinforcement" rule can be
+    // unit-tested without also exercising ToBattleCharacter (which reaches
+    // into the Database autoload and can't run outside a live Godot engine).
+    public static List<OverworldEnemyModel> SelectReinforcements(
+        OverworldEnemyModel primary,
+        IReadOnlyList<OverworldEnemyModel> overworldEnemies,
+        float reinforcementRadius)
+    {
+        // Only Normale/Allerta enemies pile into a nearby fight as
+        // reinforcement - a Pacifico never fights, and a Paranoico is busy
+        // following its own search/patrol loop rather than reacting to a
+        // fight it happens to be near.
+        return overworldEnemies
+            .Where(enemy => enemy.Active && !ReferenceEquals(enemy, primary))
+            .Where(enemy => enemy.BehaviorKind is OverworldBehavior.Normale or OverworldBehavior.Allerta)
+            .Select(enemy => (Enemy: enemy, Distance: enemy.XYDistanceTo(primary.Position)))
+            .Where(candidate => candidate.Distance <= reinforcementRadius)
+            .OrderBy(candidate => candidate.Distance)
+            .Select(candidate => candidate.Enemy)
+            .ToList();
     }
 }
 

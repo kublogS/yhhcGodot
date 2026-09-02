@@ -2,10 +2,10 @@ using System;
 
 public enum OverworldBehavior
 {
-    Pacifista = 0,
-    Tranquillo = 1,
-    Sospetto = 2,
-    Ansioso = 3,
+    Normale = 0,
+    Allerta = 1,
+    Pacifico = 2,
+    Paranoico = 3,
 }
 
 public static class OverworldBehaviorParser
@@ -14,6 +14,6 @@ public static class OverworldBehaviorParser
     {
         return Enum.TryParse<OverworldBehavior>(value, ignoreCase: true, out var parsed)
             ? parsed
-            : OverworldBehavior.Sospetto;
+            : OverworldBehavior.Normale;
     }
 }

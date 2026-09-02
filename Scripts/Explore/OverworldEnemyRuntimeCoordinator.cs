@@ -32,9 +32,11 @@ public sealed class OverworldEnemyRuntimeCoordinator
         _rng = rng;
     }
 
+    public const float ParanoidAskCooldownSec = 3f;
+
     public float AlertTimer => _alertTimer;
 
-    public void Tick(float dt, Vector3 playerWorldPos, int[,] grid, IReadOnlyList<OverworldEnemyModel> enemies)
+    public void Tick(float dt, Vector3 playerWorldPos, DungeonData dungeon, IReadOnlyList<OverworldEnemyModel> enemies)
     {
         if (dt > 0f)
         {
@@ -60,13 +62,23 @@ public sealed class OverworldEnemyRuntimeCoordinator
             liveIds.Add(enemyId);
             OverworldAI.TickEnemyRuntime(enemy, dt);
 
+            if (enemy.BehaviorKind == OverworldBehavior.Paranoico)
+            {
+                enemy.AskAroundCooldownSec = MathF.Max(0f, enemy.AskAroundCooldownSec - dt);
+                if (enemy.AskAroundCooldownSec <= 0f)
+                {
+                    OverworldAI.ParanoidAskAround(enemy, enemies);
+                    enemy.AskAroundCooldownSec = ParanoidAskCooldownSec;
+                }
+            }
+
             if (recompute || !_cache.ContainsKey(enemyId))
             {
                 var (vxPerSec, vyPerSec, chasing) = OverworldAI.ComputeVelocity(
                     enemy,
                     playerWorldPos.X,
                     playerWorldPos.Z,
-                    grid,
+                    dungeon,
                     _alertTimer);
                 _cache[enemyId] = new EnemyMotionDecision(vxPerSec, vyPerSec, chasing);
             }

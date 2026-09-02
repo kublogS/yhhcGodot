@@ -30,6 +30,6 @@ public static class ExploreEncounterWorldSync
             return;
         }
 
-        enemyRuntime.Tick(0f, player.GlobalPosition, dungeon.Grid, enemies);
+        enemyRuntime.Tick(0f, player.GlobalPosition, dungeon, enemies);
     }
 }

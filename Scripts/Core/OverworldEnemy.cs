@@ -13,10 +13,9 @@ public sealed class OverworldEnemyModel
     public bool Active { get; set; } = true;
     public string Kind { get; set; } = "Mob";
     public string SpecName { get; set; } = "Goblin";
-    public string Behavior { get; set; } = "Sospetto";
+    public string Behavior { get; set; } = "Normale";
     public float SpeedX { get; set; } = 1.6f;
     public int IntelligenceY { get; set; } = 1;
-    public bool Alerted { get; set; }
     public bool IsStuck { get; set; }
     public float StuckTimer { get; set; }
     public float WakeTimer { get; set; }
@@ -24,7 +23,14 @@ public sealed class OverworldEnemyModel
     public float SpeechTimer { get; set; }
     public float BattleMult { get; set; } = 1f;
     public bool IsFloorBoss { get; set; }
-    [JsonIgnore] public float BehaviorAlertTimer { get; set; }
+
+    // Paranoico patrol/search state - never persisted, purely a runtime memory
+    // of "where have I already looked" and "what has anyone told me".
+    [JsonIgnore] public int? PatrolTargetRoomId { get; set; }
+    [JsonIgnore] public HashSet<int> VisitedRoomIds { get; } = new();
+    [JsonIgnore] public Vector2? LastKnownPlayerPosition { get; set; }
+    [JsonIgnore] public float LastKnownPlayerAgeSec { get; set; } = float.PositiveInfinity;
+    [JsonIgnore] public float AskAroundCooldownSec { get; set; }
 
     [JsonIgnore]
     public OverworldBehavior BehaviorKind
