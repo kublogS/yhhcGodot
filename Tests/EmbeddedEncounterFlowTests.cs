@@ -92,34 +92,16 @@ public static class EmbeddedEncounterFlowTests
         public int LabyrinthCompletions { get; set; }
         public RuntimeRunState CurrentRun { get; } = new();
 
-        public (int Exp, int Soli, int Tokens, int Items) FinalizeBattleRewards()
-        {
-            return (State?.BattleLootExp ?? 0, State?.BattleClaimableSoli ?? 0, State?.BattleStealTokens ?? 0, State?.BattleLootItems.Count ?? 0);
-        }
+        // Real reward logic; only move-stealing is stubbed so flow tests stay
+        // independent of the enemy move pool.
+        public (int Exp, int Soli, int Tokens, int Items) FinalizeBattleRewards() => BattleRewardService.Finalize(this);
 
-        public void ClearAfterReward()
-        {
-            if (State is null)
-            {
-                return;
-            }
-
-            State.Enemies.Clear();
-            State.EnemyQueue.Clear();
-            State.ResetBattleInstance();
-            PendingMove = null;
-            HasPendingMoveReplace = false;
-            PendingReplaceIndex = 0;
-        }
+        public void ClearAfterReward() => BattleRewardService.ClearAfterReward(this);
 
         public MoveModel? PickStealableMove() => null;
 
         public bool TryAddMoveToPlayer(MoveModel move) => false;
 
-        public int XpNeededForLevel(int level)
-        {
-            var mult = 0.5f + 0.2f * Math.Max(0, level - 1);
-            return Math.Max(1, (int)MathF.Round(100f * mult));
-        }
+        public int XpNeededForLevel(int level) => BattleRewardService.XpNeededForLevel(level);
     }
 }

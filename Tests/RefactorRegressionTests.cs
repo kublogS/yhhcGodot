@@ -32,6 +32,11 @@ public static class RefactorRegressionTests
             ("battle_flee_returns_to_explore", EmbeddedEncounterFlowTests.BattleFleeReturnsToExplore),
             ("battle_victory_opens_reward", EmbeddedEncounterFlowTests.BattleVictoryOpensReward),
             ("reward_persist_success_returns_explore", EmbeddedEncounterFlowTests.RewardPersistSuccessReturnsExplore),
+            ("reward_steal_tokens_from_kills", RewardAndRunLifecycleTests.StealTokensComeFromKills),
+            ("reward_add_move_fills_then_requests_replace", RewardAndRunLifecycleTests.AddMoveFillsEmptySlotsThenRequestsReplace),
+            ("reward_clear_resets_pending_replace", RewardAndRunLifecycleTests.ClearAfterRewardResetsPendingReplace),
+            ("reward_xp_curve_strictly_increasing", RewardAndRunLifecycleTests.XpCurveIsStrictlyIncreasing),
+            ("run_completes_after_last_floor_returns_to_hub", RewardAndRunLifecycleTests.RunCompletesAfterLastFloorAndReturnsToHub),
         };
         var activeCases = filters is { Length: > 0 }
             ? cases.Where(test => Array.Exists(filters, filter => test.Name.Contains(filter, System.StringComparison.OrdinalIgnoreCase))).ToArray()

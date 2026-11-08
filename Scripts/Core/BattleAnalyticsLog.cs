@@ -13,6 +13,7 @@ public static class BattleAnalyticsLog
 {
     private const string LogDir = "user://battle_logs";
     private const string SummaryPath = "user://battle_logs/battles_summary.csv";
+    private const int MaxDetailedRecords = 200;
     private const string SummaryHeader =
         "startedAtUnix,context,enemyCount,enemyNames,outcome,totalTurns,playerMaxHp,playerHpStart,playerHpEnd,damageDealt,damageTaken";
 
@@ -126,7 +127,28 @@ public static class BattleAnalyticsLog
 
         WriteRecord(_current);
         AppendSummary(_current, _totalDamageDealt, _totalDamageTaken);
+        PruneOldRecords();
         _current = null;
+    }
+
+    // Per-battle JSON files would otherwise accumulate forever in user://.
+    // The CSV summary keeps one row per battle, so older detail can go.
+    private static void PruneOldRecords()
+    {
+        using var dir = DirAccess.Open(LogDir);
+        if (dir is null)
+        {
+            return;
+        }
+
+        var records = dir.GetFiles()
+            .Where(name => name.StartsWith("battle_", StringComparison.Ordinal) && name.EndsWith(".json", StringComparison.Ordinal))
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToList();
+        for (var i = 0; i < records.Count - MaxDetailedRecords; i++)
+        {
+            dir.Remove(records[i]);
+        }
     }
 
     private static void WriteRecord(BattleLogRecord record)

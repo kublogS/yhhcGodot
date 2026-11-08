@@ -2,11 +2,6 @@ using Godot;
 
 public partial class GameSession
 {
-    public RunStateContract CaptureRunContract()
-    {
-        return RunLifecycleService.Capture(this);
-    }
-
     public void ApplyRunContract(
         RunStateContract contract,
         DungeonData? dungeon,

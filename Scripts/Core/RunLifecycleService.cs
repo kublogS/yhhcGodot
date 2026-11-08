@@ -3,12 +3,12 @@ using Godot;
 
 public static class RunLifecycleService
 {
-    public static RunStateContract Capture(GameSession session)
+    public static RunStateContract Capture(ISessionSnapshotHost session)
     {
         return session.CurrentRun.ToContract();
     }
 
-    public static void ApplyLoadedRun(GameSession session, RunStateContract contract, DungeonData? dungeon, List<OverworldEnemyModel>? enemies, Vector3 playerPosition, float playerYaw)
+    public static void ApplyLoadedRun(ISessionSnapshotHost session, RunStateContract contract, DungeonData? dungeon, List<OverworldEnemyModel>? enemies, Vector3 playerPosition, float playerYaw)
     {
         ApplyContract(session, contract);
         if (!contract.HasOverworldRuntime || dungeon is null)
@@ -23,7 +23,7 @@ public static class RunLifecycleService
         session.PlayerYawRadians = playerYaw;
     }
 
-    public static void BeginOverworldRun(GameSession session)
+    public static void BeginOverworldRun(ISessionSnapshotHost session)
     {
         if (session.State is null)
         {
@@ -38,7 +38,7 @@ public static class RunLifecycleService
         GenerateCurrentFloor(session);
     }
 
-    public static void GenerateNewDungeon(GameSession session)
+    public static void GenerateNewDungeon(ISessionSnapshotHost session)
     {
         if (session.State is null)
         {
@@ -51,7 +51,7 @@ public static class RunLifecycleService
         GenerateCurrentFloor(session);
     }
 
-    public static bool TryAdvanceFloor(GameSession session)
+    public static bool TryAdvanceFloor(ISessionSnapshotHost session)
     {
         if (session.State is null || !session.CurrentRun.IsActive)
         {
@@ -71,7 +71,7 @@ public static class RunLifecycleService
         return true;
     }
 
-    public static void ReturnToSpawnHub(GameSession session)
+    public static void ReturnToSpawnHub(ISessionSnapshotHost session)
     {
         ApplyContract(session, RunStatePolicy.ReturnToIndice(session.CurrentRun.MaxFloors));
         session.CurrentDungeon = null;
@@ -80,12 +80,12 @@ public static class RunLifecycleService
         session.PlayerYawRadians = 0f;
     }
 
-    private static void ApplyContract(GameSession session, RunStateContract contract)
+    private static void ApplyContract(ISessionSnapshotHost session, RunStateContract contract)
     {
         session.CurrentRun.Apply(contract);
     }
 
-    private static void GenerateCurrentFloor(GameSession session)
+    private static void GenerateCurrentFloor(ISessionSnapshotHost session)
     {
         if (session.State is null)
         {

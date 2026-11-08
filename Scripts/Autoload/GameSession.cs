@@ -20,13 +20,7 @@ public partial class GameSession : Node, INewGameSessionContext, IRewardSessionC
     public int DeepestFloor { get; set; }
     public int LabyrinthCompletions { get; set; }
     public RuntimeRunState CurrentRun { get; } = new();
-
-    // Legacy runtime aliases. New code should prefer CurrentRun.
-    public bool HasEnteredOverworld { get => CurrentRun.Location == RunLocation.Overworld; set => CurrentRun.Location = value ? RunLocation.Overworld : RunLocation.Indice; }
-    public bool RunActive { get => CurrentRun.IsActive; set => CurrentRun.IsActive = value; }
-    public int ProcSeed { get => CurrentRun.Seed; set => CurrentRun.Seed = Math.Max(0, value); }
-    public int ProcFloor { get => CurrentRun.Floor; set => CurrentRun.Floor = Math.Max(0, value); }
-    public int ProcMaxFloors { get => CurrentRun.MaxFloors; set => CurrentRun.MaxFloors = value; }
+    public IBattleAnalyticsSink Analytics { get; set; } = BattleAnalyticsLogSink.Instance;
 
     public override void _EnterTree()
     {
@@ -44,7 +38,7 @@ public partial class GameSession : Node, INewGameSessionContext, IRewardSessionC
         DeepestFloor = 1;
         LabyrinthCompletions = 0;
         ClearEncounterWorldEnemies();
-        CurrentRun.Reset(ProcMaxFloors);
+        CurrentRun.Reset(CurrentRun.MaxFloors);
         CurrentDungeon = null;
         OverworldEnemies.Clear();
         PlayerWorldPosition = Vector3.Zero;
@@ -77,7 +71,7 @@ public partial class GameSession : Node, INewGameSessionContext, IRewardSessionC
         BattleStateService.BeginEncounter(State, enemies, queued);
         LastEncounterContext = context;
         LastBattleLog.Clear();
-        BattleAnalyticsLog.BeginBattle(State, context);
+        Analytics.BeginBattle(State, context);
     }
 
     public string AddReinforcement(CharacterModel enemy)

@@ -79,7 +79,7 @@ public static partial class DungeonGenerator
     {
         if (errors.Count > 0)
         {
-            GD.PrintErr($"[Dungeon] {stage} invalid: {string.Join(", ", errors)}");
+            GameLog.Error($"[Dungeon] {stage} invalid: {string.Join(", ", errors)}");
         }
     }
 

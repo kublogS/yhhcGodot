@@ -4,7 +4,7 @@ using System.Linq;
 
 public static class BattleRewardService
 {
-    public static (int Exp, int Soli, int Tokens, int Items) Finalize(GameSession session)
+    public static (int Exp, int Soli, int Tokens, int Items) Finalize(ISessionSnapshotHost session)
     {
         var state = session.State;
         if (state is null)
@@ -17,7 +17,7 @@ public static class BattleRewardService
         return (state.BattleLootExp, state.BattleClaimableSoli, tokens, state.BattleLootItems.Count);
     }
 
-    public static void ClearAfterReward(GameSession session)
+    public static void ClearAfterReward(ISessionSnapshotHost session)
     {
         var state = session.State;
         if (state is null)
@@ -33,7 +33,7 @@ public static class BattleRewardService
         session.PendingReplaceIndex = 0;
     }
 
-    public static List<MoveModel> BuildStealableMovePool(GameSession session)
+    public static List<MoveModel> BuildStealableMovePool(ISessionSnapshotHost session)
     {
         var state = session.State;
         if (state is null)
@@ -59,7 +59,7 @@ public static class BattleRewardService
         return pool;
     }
 
-    public static MoveModel? PickStealableMove(GameSession session)
+    public static MoveModel? PickStealableMove(ISessionSnapshotHost session)
     {
         var state = session.State;
         if (state is null || state.BattleStealTokens <= 0)
@@ -84,7 +84,7 @@ public static class BattleRewardService
         return candidates[state.Rng.NextInt(0, candidates.Count - 1)];
     }
 
-    public static bool TryAddMoveToPlayer(GameSession session, MoveModel move)
+    public static bool TryAddMoveToPlayer(ISessionSnapshotHost session, MoveModel move)
     {
         var state = session.State;
         if (state is null)

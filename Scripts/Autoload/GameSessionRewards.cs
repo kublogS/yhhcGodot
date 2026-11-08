@@ -14,11 +14,6 @@ public partial class GameSession
         BattleRewardService.ClearAfterReward(this);
     }
 
-    public List<MoveModel> StealableMovePool()
-    {
-        return BattleRewardService.BuildStealableMovePool(this);
-    }
-
     public MoveModel? PickStealableMove()
     {
         return BattleRewardService.PickStealableMove(this);

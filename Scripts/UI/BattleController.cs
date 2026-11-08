@@ -27,7 +27,7 @@ public partial class BattleController : Control
     {
         _session = GetNode<GameSession>("/root/GameSession");
         Theme = GameUiThemeFactory.GetOrCreate();
-        _flow = new BattleFlowCoordinator(_session, new BattleAnalyticsLogSink());
+        _flow = new BattleFlowCoordinator(_session, _session.Analytics);
         _log = GetNode<RichTextLabel>("Root/CombatRow/HudPanel/HudRoot/TopRightLog");
         _backdrop = GetNode<TextureRect>("Backdrop");
         _backdropFallback = GetNode<ColorRect>("BackdropFallback");
@@ -135,6 +135,9 @@ public partial class BattleController : Control
         _actionButtons.Add(button);
     }
 
+    // async void is unavoidable for a Godot signal handler, so every exception
+    // must be caught here: an escaped one would leave the battle half-applied
+    // with no log line pointing at it.
     private async void ExecuteTurn(CombatTurnRequest request)
     {
         if (_turnLocked)
@@ -146,6 +149,10 @@ public partial class BattleController : Control
         try
         {
             var result = await BattleTurnPlayback.ExecuteAsync(this, _flow, request, _viewState, EventPresenter);
+            if (!BattleTurnPlayback.IsAlive(this))
+            {
+                return;
+            }
             if (result.Outcome != BattleFlowOutcome.ContinueBattle)
             {
                 HandleOutcome(result.Outcome);
@@ -153,10 +160,17 @@ public partial class BattleController : Control
             }
             Refresh();
         }
+        catch (Exception ex)
+        {
+            GD.PushError($"Errore durante il turno di battaglia: {ex}");
+        }
         finally
         {
-            _turnLocked = false;
-            _viewState.SetButtonsEnabled(true);
+            if (BattleTurnPlayback.IsAlive(this))
+            {
+                _turnLocked = false;
+                _viewState.SetButtonsEnabled(true);
+            }
         }
     }
 

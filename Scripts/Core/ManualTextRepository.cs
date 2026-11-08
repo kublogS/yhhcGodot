@@ -130,7 +130,7 @@ public static class ManualTextRepository
             }
             catch (Exception ex)
             {
-                GD.PrintErr($"Impossibile leggere il manuale esterno {path}: {ex.Message}");
+                GameLog.Error($"Impossibile leggere il manuale esterno {path}: {ex.Message}");
             }
         }
 

@@ -1,3 +1,6 @@
+// GodotSharp is loaded without the engine here: any GD.* call would segfault.
+GameLog.EngineAvailable = false;
+
 var failures = RefactorRegressionTests.RunAll(args);
 if (failures > 0)
 {

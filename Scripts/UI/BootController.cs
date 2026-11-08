@@ -1,6 +1,8 @@
 using System;
 using Godot;
 
+// Autoloads (Database, SaveService, ...) are already _Ready by the time the
+// main scene runs, so data and save slots are loaded; Boot only hands off.
 public partial class BootController : Node
 {
     public override void _Ready()
@@ -12,33 +14,12 @@ public partial class BootController : Node
     {
         try
         {
-            var database = GetNodeOrNull<Database>("/root/Database");
-            database?.LoadAll();
-
-            var saveService = GetNodeOrNull<SaveService>("/root/SaveService");
-            saveService?.EnsureSlotsExist();
-
-            var sceneRouter = GetNodeOrNull<SceneRouter>("/root/SceneRouter");
-            if (sceneRouter is not null)
-            {
-                sceneRouter.GoToMainMenu();
-                return;
-            }
-
-            var directErr = GetTree().ChangeSceneToFile("res://Scenes/MainMenu.tscn");
-            if (directErr != Error.Ok)
-            {
-                GD.PushError($"Boot fallback fallito: {directErr}");
-            }
+            SceneRouteNavigator.Navigate(SceneRoute.MainMenu, GetTree());
         }
         catch (Exception ex)
         {
             GD.PushError($"Errore in boot: {ex}");
-            var err = GetTree().ChangeSceneToFile("res://Scenes/MainMenu.tscn");
-            if (err != Error.Ok)
-            {
-                GD.PushError($"Cambio scena di emergenza fallito: {err}");
-            }
+            SceneRouteNavigator.ChangeScene(SceneRoute.MainMenu, GetTree());
         }
     }
 }

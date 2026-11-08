@@ -19,6 +19,7 @@ public sealed class SaveSlotRepository : ISaveSlotStore
         foreach (var slotId in SaveServiceSettings.SlotIds)
         {
             var path = SlotPath(slotId);
+            RecoverInterruptedWrite(path);
             if (!FileAccess.FileExists(path))
             {
                 WriteSlot(slotId, DefaultSlot(slotId));
@@ -70,33 +71,116 @@ public sealed class SaveSlotRepository : ISaveSlotStore
     private SaveFileData ReadSlot(int slotId)
     {
         var path = SlotPath(slotId);
+        RecoverInterruptedWrite(path);
         if (!FileAccess.FileExists(path))
         {
             return DefaultSlot(slotId);
         }
 
-        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
-        if (file is null)
+        var raw = ReadAllText(path);
+        if (raw is null)
         {
             LogError($"Impossibile aprire il salvataggio {path}: {FileAccess.GetOpenError()}");
             return DefaultSlot(slotId);
         }
 
-        return DeserializeOrDefault(file.GetAsText(), slotId, path);
+        if (!TryDeserialize(raw, out var parsed, out var error))
+        {
+            LogError($"Salvataggio corrotto o non leggibile in {path}: {error}");
+            QuarantineCorrupted(path, raw);
+            return DefaultSlot(slotId);
+        }
+
+        return SanitizePayload(parsed, slotId);
     }
 
     public static SaveFileData DeserializeOrDefault(string raw, int slotId, string sourceLabel = "slot")
     {
+        if (TryDeserialize(raw, out var parsed, out var error))
+        {
+            return SanitizePayload(parsed, slotId);
+        }
+
+        LogError($"Salvataggio corrotto o non leggibile in {sourceLabel}: {error}");
+        return DefaultSlot(slotId);
+    }
+
+    private static bool TryDeserialize(string raw, out SaveFileData? parsed, out string error)
+    {
         try
         {
-            var parsed = JsonSerializer.Deserialize<SaveFileData>(raw, SaveServiceSettings.JsonOptions);
-            return SanitizePayload(parsed, slotId);
+            parsed = JsonSerializer.Deserialize<SaveFileData>(raw, SaveServiceSettings.JsonOptions);
+            error = parsed is null ? "payload vuoto (null)" : string.Empty;
+            return parsed is not null;
         }
         catch (Exception ex)
         {
-            LogError($"Salvataggio corrotto o non leggibile in {sourceLabel}: {ex.Message}");
-            return DefaultSlot(slotId);
+            parsed = null;
+            error = ex.Message;
+            return false;
         }
+    }
+
+    // AtomicWrite renames slot -> .bak and then .tmp -> slot. If the game dies
+    // between those two renames there is no slot file on next launch, and
+    // EnsureSlotsExist would write an empty slot whose AtomicWrite then deletes
+    // the .bak: the save is gone. Promote the newest readable leftover instead
+    // (.tmp is complete and flushed before the first rename, so it wins).
+    private static void RecoverInterruptedWrite(string path)
+    {
+        if (FileAccess.FileExists(path))
+        {
+            return;
+        }
+
+        foreach (var candidate in new[] { path + ".tmp", path + ".bak" })
+        {
+            if (!FileAccess.FileExists(candidate))
+            {
+                continue;
+            }
+
+            var raw = ReadAllText(candidate);
+            if (raw is null || !TryDeserialize(raw, out _, out _))
+            {
+                continue;
+            }
+
+            var err = DirAccess.RenameAbsolute(candidate, path);
+            if (err == Error.Ok)
+            {
+                LogError($"Salvataggio interrotto: ripristinato {path} da {candidate}");
+                return;
+            }
+
+            LogError($"Impossibile ripristinare {path} da {candidate}: {err}");
+        }
+    }
+
+    // Keep a copy of an unreadable slot before the UI shows it as empty, so the
+    // next save into that slot does not destroy the only evidence/data.
+    private static void QuarantineCorrupted(string path, string raw)
+    {
+        var quarantinePath = path + ".corrupt";
+        if (FileAccess.FileExists(quarantinePath))
+        {
+            return;
+        }
+
+        using var file = FileAccess.Open(quarantinePath, FileAccess.ModeFlags.Write);
+        if (file is null)
+        {
+            LogError($"Impossibile mettere in quarantena il save corrotto {path}: {FileAccess.GetOpenError()}");
+            return;
+        }
+
+        file.StoreString(raw);
+    }
+
+    private static string? ReadAllText(string path)
+    {
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+        return file?.GetAsText();
     }
 
     private static SaveFileData SanitizePayload(SaveFileData? payload, int slotId)
@@ -197,14 +281,5 @@ public sealed class SaveSlotRepository : ISaveSlotStore
         }
     }
 
-    private static void LogError(string message)
-    {
-        if (Engine.GetMainLoop() is null)
-        {
-            Console.Error.WriteLine(message);
-            return;
-        }
-
-        GD.PrintErr(message);
-    }
+    private static void LogError(string message) => GameLog.Error(message);
 }
