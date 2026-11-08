@@ -1,13 +1,16 @@
 using System;
+using Godot;
 
 public static partial class OverworldAI
 {
     public static bool HasLineOfSight(int[,] grid, float startX, float startY, float endX, float endY)
     {
-        var x0 = (int)MathF.Floor(startX);
-        var y0 = (int)MathF.Floor(startY);
-        var x1 = (int)MathF.Floor(endX);
-        var y1 = (int)MathF.Floor(endY);
+        var start = DungeonMetrics.WorldToGrid(new Vector3(startX, 0f, startY), DungeonMetrics.TileSize);
+        var end = DungeonMetrics.WorldToGrid(new Vector3(endX, 0f, endY), DungeonMetrics.TileSize);
+        var x0 = start.X;
+        var y0 = start.Y;
+        var x1 = end.X;
+        var y1 = end.Y;
 
         var dx = Math.Abs(x1 - x0);
         var dy = Math.Abs(y1 - y0);
@@ -19,7 +22,13 @@ public static partial class OverworldAI
 
         while (true)
         {
-            if (x0 < 0 || y0 < 0 || x0 >= width || y0 >= height || grid[y0, x0] == (int)TileType.Wall)
+            if (x0 < 0 || y0 < 0 || x0 >= width || y0 >= height)
+            {
+                return false;
+            }
+
+            var tile = (TileType)grid[y0, x0];
+            if (tile is TileType.Wall or TileType.Breakable)
             {
                 return false;
             }

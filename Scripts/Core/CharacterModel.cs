@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 public sealed class CharacterModel
 {
@@ -10,7 +11,6 @@ public sealed class CharacterModel
     public int Difesa { get; set; }
     public int Agilita { get; set; }
     public int Fortuna { get; set; }
-    public int Intelligenza { get; set; }
     public int Fede { get; set; }
     public int Intelligence { get; set; }
     public int Exp { get; set; }
@@ -22,11 +22,26 @@ public sealed class CharacterModel
     public int StatPoints { get; set; }
     public string Sprite { get; set; } = "player";
     public string Kind { get; set; } = "Player";
+    public string BattleActorId { get; set; } = string.Empty;
     public List<string> Types { get; set; } = new();
     public List<MoveModel?> Moves { get; set; } = new();
     public Dictionary<string, int> Inventory { get; set; } = new();
     public Dictionary<string, string?> Equipment { get; set; } = new();
     public bool Defending { get; set; }
+
+    // Canonical runtime stat. Intelligenza/IntelligenceStat remain legacy bridges for save/runtime compatibility.
+    public int Intelligenza
+    {
+        get => Intelligence;
+        set => Intelligence = value;
+    }
+
+    [JsonIgnore]
+    public int IntelligenceStat
+    {
+        get => Intelligence;
+        set => Intelligence = value;
+    }
 
     public bool IsAlive => Hp > 0;
 

@@ -24,6 +24,7 @@ public sealed class DungeonData
     public Dictionary<int, int> RoomLevels { get; set; } = new();
     public HashSet<Vector2I> CorridorTiles { get; set; } = new();
     public HashSet<Vector2I> BreakableTiles { get; set; } = new();
+    public HashSet<Vector2I> BrokenBreakableTiles { get; set; } = new();
     public HashSet<Vector2I> ExitTiles { get; set; } = new();
     public HashSet<Vector2I> SaveTiles { get; set; } = new();
     public HashSet<int> SaveRoomIds { get; set; } = new();
@@ -68,7 +69,37 @@ public sealed class DungeonData
 
     public bool IsWalkable(int x, int y)
     {
+        return CanTraverse(x, y);
+    }
+
+    public bool CanTraverse(int x, int y)
+    {
+        var state = GetTraversalState(x, y);
+        return state is TileTraversalState.Walkable or TileTraversalState.BreakableBroken;
+    }
+
+    public TileTraversalState GetTraversalState(int x, int y)
+    {
+        if (BrokenBreakableTiles.Contains(new Vector2I(x, y)))
+        {
+            return TileTraversalState.BreakableBroken;
+        }
+
         var tile = GetTile(x, y);
-        return tile is TileType.Floor or TileType.Doorway or TileType.Threshold or TileType.Exit or TileType.Breakable or TileType.Save;
+        return DungeonWalkabilityPolicy.Resolve(tile, isBreakableBroken: false);
+    }
+
+    public bool TryBreakBreakable(int x, int y)
+    {
+        if (GetTile(x, y) != TileType.Breakable)
+        {
+            return false;
+        }
+
+        var tile = new Vector2I(x, y);
+        BreakableTiles.Remove(tile);
+        BrokenBreakableTiles.Add(tile);
+        Grid[y, x] = (int)TileType.Floor;
+        return true;
     }
 }

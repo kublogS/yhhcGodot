@@ -95,17 +95,35 @@ public partial class SavesMenuController
         _pendingOverwriteTargetIndex = -1;
     }
 
-    private static void ApplySlotTheme(Button button, bool isUsed, bool isSelected)
+    private static void ApplySlotTheme(
+        PanelContainer card,
+        Button selectButton,
+        Button deleteButton,
+        Button copyButton,
+        bool isUsed,
+        bool isSelected,
+        bool isCopyTarget)
     {
-        var fill = isUsed ? PythonColorPalette.SaveSlotFill : PythonColorPalette.ButtonBg;
-        var border = isSelected ? PythonColorPalette.Title : PythonColorPalette.PanelBorder;
-        button.AddThemeStyleboxOverride("normal", BuildSlotStyle(fill, border, 1));
-        button.AddThemeStyleboxOverride("hover", BuildSlotStyle(fill, PythonColorPalette.Title, 2));
-        button.AddThemeStyleboxOverride("pressed", BuildSlotStyle(PythonColorPalette.Gray, PythonColorPalette.Title, 2));
-        button.AddThemeStyleboxOverride("focus", BuildSlotStyle(fill, PythonColorPalette.Title, 2));
+        var fill = isUsed ? new Color(0.13f, 0.21f, 0.17f, 0.9f) : new Color(0.11f, 0.16f, 0.14f, 0.84f);
+        var border = isSelected
+            ? new Color(0.45f, 0.75f, 0.57f, 1f)
+            : (isCopyTarget ? new Color(0.35f, 0.61f, 0.47f, 1f) : new Color(0.21f, 0.35f, 0.28f, 0.95f));
+        card.AddThemeStyleboxOverride("panel", BuildSlotStyle(fill, border, isSelected ? 3 : 2, 14));
+
+        var selectFill = isSelected ? new Color(0.29f, 0.53f, 0.4f, 0.95f) : new Color(0.21f, 0.37f, 0.29f, 0.92f);
+        var selectBorder = isSelected ? new Color(0.55f, 0.82f, 0.65f, 1f) : new Color(0.39f, 0.61f, 0.49f, 1f);
+        selectButton.Modulate = new Color(0.9f, 0.98f, 0.93f, 1f);
+        selectButton.AddThemeStyleboxOverride("normal", BuildSlotStyle(selectFill, selectBorder, 2, 10));
+        selectButton.AddThemeStyleboxOverride("hover", BuildSlotStyle(selectFill.Lightened(0.08f), selectBorder, 2, 10));
+        selectButton.AddThemeStyleboxOverride("pressed", BuildSlotStyle(selectFill.Darkened(0.08f), selectBorder.Darkened(0.1f), 2, 10));
+
+        deleteButton.Modulate = new Color(0.84f, 0.92f, 0.88f, deleteButton.Disabled ? 0.5f : 1f);
+        copyButton.Modulate = new Color(0.84f, 0.92f, 0.88f, copyButton.Disabled ? 0.5f : 1f);
+        deleteButton.AddThemeStyleboxOverride("normal", BuildSlotStyle(new Color(0.16f, 0.27f, 0.22f, 0.94f), new Color(0.3f, 0.48f, 0.39f, 1f), 1, 8));
+        copyButton.AddThemeStyleboxOverride("normal", BuildSlotStyle(new Color(0.16f, 0.27f, 0.22f, 0.94f), new Color(0.3f, 0.48f, 0.39f, 1f), 1, 8));
     }
 
-    private static StyleBoxFlat BuildSlotStyle(Color fill, Color border, int width)
+    private static StyleBoxFlat BuildSlotStyle(Color fill, Color border, int width, int radius)
     {
         return new StyleBoxFlat
         {
@@ -115,10 +133,10 @@ public partial class SavesMenuController
             BorderWidthBottom = width,
             BorderWidthLeft = width,
             BorderWidthRight = width,
-            CornerRadiusTopLeft = 8,
-            CornerRadiusTopRight = 8,
-            CornerRadiusBottomLeft = 8,
-            CornerRadiusBottomRight = 8,
+            CornerRadiusTopLeft = radius,
+            CornerRadiusTopRight = radius,
+            CornerRadiusBottomLeft = radius,
+            CornerRadiusBottomRight = radius,
         };
     }
 }

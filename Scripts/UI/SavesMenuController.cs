@@ -3,10 +3,20 @@ using Godot;
 
 public partial class SavesMenuController : Control
 {
+    private GameSession _session = null!;
+    private SaveService _saveService = null!;
+    private TextureRect _background = null!;
+    private ColorRect _fallback = null!;
+    private ColorRect _tint = null!;
+    private ColorRect _bottomShade = null!;
     private Label _title = null!;
     private Label _status = null!;
     private ConfirmationDialog _deleteConfirm = null!;
     private ConfirmationDialog _overwriteConfirm = null!;
+    private readonly List<PanelContainer> _slotCards = new();
+    private readonly List<Label> _slotNameLabels = new();
+    private readonly List<Label> _slotInfoLabels = new();
+    private readonly List<Label> _slotLastSaveLabels = new();
     private readonly List<Button> _slotButtons = new();
     private readonly List<Button> _deleteButtons = new();
     private readonly List<Button> _copyButtons = new();
@@ -21,17 +31,22 @@ public partial class SavesMenuController : Control
     public override void _Ready()
     {
         Theme = GameUiThemeFactory.GetOrCreate();
-        _flow = new SaveSlotFlowCoordinator(GameSession.Instance, SaveService.Instance);
-        _title = GetNode<Label>("Center/VBox/Title");
-        _status = GetNode<Label>("Center/VBox/Status");
+        _session = GetNode<GameSession>("/root/GameSession");
+        _saveService = GetNode<SaveService>("/root/SaveService");
+        _flow = new SaveSlotFlowCoordinator(_session, _saveService);
+        _background = GetNode<TextureRect>("Background");
+        _fallback = GetNode<ColorRect>("Fallback");
+        _tint = GetNode<ColorRect>("Tint");
+        _bottomShade = GetNode<ColorRect>("BottomShade");
+        _title = GetNode<Label>("Layout/Root/Head/Title");
+        _status = GetNode<Label>("Layout/Root/Head/Status");
         _deleteConfirm = GetNode<ConfirmationDialog>("DeleteConfirm");
         _overwriteConfirm = GetNode<ConfirmationDialog>("OverwriteConfirm");
-        _title.Modulate = PythonColorPalette.SaveSlotTitle;
-        _status.Modulate = PythonColorPalette.Muted;
         _deleteConfirm.Confirmed += ConfirmDelete;
         _overwriteConfirm.Confirmed += ConfirmOverwriteCopy;
+        ConfigureBackdropStyle();
         BindButtons();
-        SetStatus("Seleziona slot: Enter carica, Elimina cancella, Duplica copia.");
+        SetStatus("Seleziona uno slot: Enter continua/nuova partita.");
         Refresh();
         FocusCurrent();
     }
@@ -73,16 +88,10 @@ public partial class SavesMenuController : Control
 
     private void BindButtons()
     {
-        _slotButtons.Add(GetNode<Button>("Center/VBox/Slot1/Select"));
-        _slotButtons.Add(GetNode<Button>("Center/VBox/Slot2/Select"));
-        _slotButtons.Add(GetNode<Button>("Center/VBox/Slot3/Select"));
-        _deleteButtons.Add(GetNode<Button>("Center/VBox/Slot1/Delete"));
-        _deleteButtons.Add(GetNode<Button>("Center/VBox/Slot2/Delete"));
-        _deleteButtons.Add(GetNode<Button>("Center/VBox/Slot3/Delete"));
-        _copyButtons.Add(GetNode<Button>("Center/VBox/Slot1/Copy"));
-        _copyButtons.Add(GetNode<Button>("Center/VBox/Slot2/Copy"));
-        _copyButtons.Add(GetNode<Button>("Center/VBox/Slot3/Copy"));
-        GetNode<Button>("Center/Back").Pressed += () => SceneRouteNavigator.Navigate(SceneRoute.MainMenu, GetTree());
+        BindSlot("Layout/Root/Cards/Slot1Card");
+        BindSlot("Layout/Root/Cards/Slot2Card");
+        BindSlot("Layout/Root/Cards/Slot3Card");
+        GetNode<Button>("Layout/Root/Bottom/Back").Pressed += () => SceneRouteNavigator.Navigate(SceneRoute.MainMenu, GetTree());
 
         for (var i = 0; i < _slotButtons.Count; i++)
         {
@@ -93,28 +102,54 @@ public partial class SavesMenuController : Control
         }
     }
 
+    private void BindSlot(string cardPath)
+    {
+        _slotCards.Add(GetNode<PanelContainer>(cardPath));
+        _slotNameLabels.Add(GetNode<Label>($"{cardPath}/CardMargin/Card/SlotLabel"));
+        _slotInfoLabels.Add(GetNode<Label>($"{cardPath}/CardMargin/Card/InfoLabel"));
+        _slotLastSaveLabels.Add(GetNode<Label>($"{cardPath}/CardMargin/Card/LastSaveLabel"));
+        _slotButtons.Add(GetNode<Button>($"{cardPath}/CardMargin/Card/Select"));
+        _deleteButtons.Add(GetNode<Button>($"{cardPath}/CardMargin/Card/Actions/Delete"));
+        _copyButtons.Add(GetNode<Button>($"{cardPath}/CardMargin/Card/Actions/Copy"));
+    }
+
     private void Refresh()
     {
         _slots.Clear();
         _slots.AddRange(_flow.ListSlots());
+        _index = Mathf.Clamp(_index, 0, _slotButtons.Count - 1);
         for (var i = 0; i < _slotButtons.Count; i++)
         {
             var slot = _slots[i];
-            _slotButtons[i].Text = slot.IsUsed
-                ? $"Slot {slot.SlotId} | {slot.CharacterName} | Floor {slot.DeepestFloor} | {slot.LastSaveText}"
-                : $"Slot {slot.SlotId} | Nuova partita";
+            var shortName = slot.CharacterName.Length > 16 ? $"{slot.CharacterName[..16]}…" : slot.CharacterName;
+            _slotNameLabels[i].Text = $"SLOT {slot.SlotId}";
+            _slotInfoLabels[i].Text = slot.IsUsed
+                ? $"{shortName}\nPiano max {slot.DeepestFloor} • Labirinti {slot.LabyrinthCompletions}"
+                : "Nuova partita\nPiano max - • Labirinti -";
+            _slotLastSaveLabels[i].Text = slot.IsUsed
+                ? $"Ultimo save: {slot.LastSaveText}"
+                : "Nessun salvataggio";
+            _slotButtons[i].Text = slot.IsUsed ? "Continua" : "Nuova partita";
+            _slotNameLabels[i].Modulate = new Color(0.86f, 0.95f, 0.9f, 1f);
+            _slotInfoLabels[i].Modulate = new Color(0.76f, 0.87f, 0.81f, 1f);
+            _slotLastSaveLabels[i].Modulate = new Color(0.64f, 0.76f, 0.7f, 1f);
             _deleteButtons[i].Disabled = !slot.IsUsed;
             _copyButtons[i].Disabled = _copySourceIndex < 0 ? !slot.IsUsed : false;
             _copyButtons[i].Text = _copySourceIndex == i ? "Annulla" : (_copySourceIndex >= 0 ? "Incolla" : "Duplica");
-            _slotButtons[i].Modulate = i == _index ? PythonColorPalette.Title : PythonColorPalette.Text;
-            _deleteButtons[i].Modulate = PythonColorPalette.Muted;
-            _copyButtons[i].Modulate = PythonColorPalette.Muted;
-            ApplySlotTheme(_slotButtons[i], slot.IsUsed, i == _index || i == _copySourceIndex);
+            ApplySlotTheme(
+                _slotCards[i],
+                _slotButtons[i],
+                _deleteButtons[i],
+                _copyButtons[i],
+                slot.IsUsed,
+                i == _index,
+                i == _copySourceIndex || (_copySourceIndex >= 0 && i != _copySourceIndex));
         }
     }
 
     private void FocusCurrent()
     {
+        _index = Mathf.Clamp(_index, 0, _slotButtons.Count - 1);
         _slotButtons[_index].GrabFocus();
         Refresh();
     }
@@ -127,5 +162,16 @@ public partial class SavesMenuController : Control
     private void SetStatus(string message)
     {
         _status.Text = message;
+    }
+
+    private void ConfigureBackdropStyle()
+    {
+        _background.Texture = GameAssets.LoadMainMenuWallpaper();
+        _fallback.Visible = _background.Texture is null;
+        _fallback.Color = new Color(0.3f, 0.38f, 0.34f, 1f);
+        _tint.Color = new Color(0.14f, 0.22f, 0.18f, 0.56f);
+        _bottomShade.Color = new Color(0.02f, 0.05f, 0.04f, 0.82f);
+        _title.Modulate = new Color(0.86f, 0.95f, 0.9f, 1f);
+        _status.Modulate = new Color(0.69f, 0.81f, 0.74f, 1f);
     }
 }

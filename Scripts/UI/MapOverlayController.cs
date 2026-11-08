@@ -18,6 +18,11 @@ public partial class MapOverlayController : Control
 
     public void UpdateFromDungeon(DungeonData dungeon, Vector3 playerPos, List<EnemyAgent> enemies)
     {
+        if (ShouldResetExploration(dungeon))
+        {
+            _explored.Clear();
+        }
+
         _dungeon = dungeon;
         _playerPos = playerPos;
         _enemyPos.Clear();
@@ -26,7 +31,7 @@ public partial class MapOverlayController : Control
             _enemyPos.Add(enemy.GlobalPosition);
         }
 
-        var tile = DungeonGenerator.WorldToGrid(playerPos, DungeonBuilder.TileSize);
+        var tile = DungeonGenerator.WorldToGrid(playerPos, DungeonMetrics.TileSize);
         for (var y = tile.Y - 3; y <= tile.Y + 3; y++)
         {
             for (var x = tile.X - 3; x <= tile.X + 3; x++)
@@ -36,6 +41,15 @@ public partial class MapOverlayController : Control
         }
 
         QueueRedraw();
+    }
+
+    private bool ShouldResetExploration(DungeonData dungeon)
+    {
+        return _dungeon is null
+            || _dungeon.Seed != dungeon.Seed
+            || _dungeon.FloorIndex != dungeon.FloorIndex
+            || _dungeon.Width != dungeon.Width
+            || _dungeon.Height != dungeon.Height;
     }
 
     public override void _Draw()
@@ -75,11 +89,11 @@ public partial class MapOverlayController : Control
 
         foreach (var enemy in _enemyPos)
         {
-            var e = DungeonGenerator.WorldToGrid(enemy, DungeonBuilder.TileSize);
+            var e = DungeonGenerator.WorldToGrid(enemy, DungeonMetrics.TileSize);
             DrawCircle(offset + new Vector2((e.X + 0.5f) * mapScale, (e.Y + 0.5f) * mapScale), 3, PythonColorPalette.Danger);
         }
 
-        var player = DungeonGenerator.WorldToGrid(_playerPos, DungeonBuilder.TileSize);
+        var player = DungeonGenerator.WorldToGrid(_playerPos, DungeonMetrics.TileSize);
         DrawCircle(offset + new Vector2((player.X + 0.5f) * mapScale, (player.Y + 0.5f) * mapScale), 4, PythonColorPalette.Title);
     }
 

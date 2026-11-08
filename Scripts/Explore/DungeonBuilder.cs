@@ -3,39 +3,48 @@ using Godot;
 
 public static class DungeonBuilder
 {
-    public static float TileSize = 2.0f;
     private const float WallHeight = 6.6f;
     private const float WallColliderInset = 0.24f;
+    private const string BreakableNodePrefix = "BreakableTile_";
 
     public static void Build(Node3D root, DungeonData dungeon)
     {
         Clear(root);
-        var floorMesh = new BoxMesh { Size = new Vector3(TileSize, 0.1f, TileSize) };
-        var wallMesh = new BoxMesh { Size = new Vector3(TileSize, WallHeight, TileSize) };
+        var tileSize = DungeonMetrics.TileSize;
+        var floorMesh = new BoxMesh { Size = new Vector3(tileSize, 0.1f, tileSize) };
+        var wallMesh = new BoxMesh { Size = new Vector3(tileSize, WallHeight, tileSize) };
         var wallShape = new BoxShape3D
         {
-            Size = new Vector3(TileSize - (WallColliderInset * 2f), WallHeight, TileSize - (WallColliderInset * 2f)),
+            Size = new Vector3(tileSize - (WallColliderInset * 2f), WallHeight, tileSize - (WallColliderInset * 2f)),
         };
 
         var floorMaterial = MakeMaterial(PythonColorPalette.FloorLightGray);
-        var wallMaterial = MakeMaterial(PythonColorPalette.GrayLight);
+        var wallMaterial = DungeonMaterialFactory.CreateDungeonWallMaterial();
+        var breakableMaterial = DungeonMaterialFactory.CreateBreakableWallMaterial();
         var saveMaterial = MakeMaterial(new Color(0.84f, 0.9f, 1f, 1f));
         var lampMaterial = MakeMaterial(new Color(0.72f, 0.75f, 0.8f, 1f));
-        var exitMaterial = MakeMaterial(PythonColorPalette.WithAlpha(PythonColorPalette.Title, 205));
-        ((StandardMaterial3D)exitMaterial).Transparency = BaseMaterial3D.TransparencyEnum.Alpha;
+        var exitMaterial = DungeonMaterialFactory.CreateObsidianMaterial();
 
         for (var y = 0; y < dungeon.Height; y++)
         {
             for (var x = 0; x < dungeon.Width; x++)
             {
                 var tile = dungeon.GetTile(x, y);
-                var pos = DungeonGenerator.GridToWorld(x, y, TileSize);
-                if (tile is TileType.Floor or TileType.Doorway or TileType.Threshold or TileType.Exit or TileType.Breakable or TileType.Save)
+                var state = dungeon.GetTraversalState(x, y);
+                var pos = DungeonGenerator.GridToWorld(x, y, tileSize);
+                if (state != TileTraversalState.Solid)
                 {
                     AddMesh(root, floorMesh, floorMaterial, pos + new Vector3(0f, -0.05f, 0f));
                 }
 
-                if (tile == TileType.Wall)
+                if (state == TileTraversalState.BreakableIntact)
+                {
+                    var tilePos = new Vector2I(x, y);
+                    AddWall(root, wallMesh, breakableMaterial, wallShape, pos + new Vector3(0f, WallHeight * 0.5f - 0.1f, 0f), BreakableNodeName(tilePos));
+                    continue;
+                }
+
+                if (tile == TileType.Wall || state == TileTraversalState.Solid)
                 {
                     AddWall(root, wallMesh, wallMaterial, wallShape, pos + new Vector3(0f, WallHeight * 0.5f - 0.1f, 0f));
                     continue;
@@ -55,6 +64,23 @@ public static class DungeonBuilder
         AddSanctuaryWallLamps(root, dungeon, lampMaterial);
     }
 
+    public static bool TryRemoveBreakableNode(Node3D root, Vector2I tile)
+    {
+        var candidate = root.FindChild(BreakableNodeName(tile), recursive: true, owned: false) as Node;
+        if (candidate is null)
+        {
+            return false;
+        }
+
+        candidate.QueueFree();
+        return true;
+    }
+
+    private static string BreakableNodeName(Vector2I tile)
+    {
+        return $"{BreakableNodePrefix}{tile.X}_{tile.Y}";
+    }
+
     private static StandardMaterial3D MakeMaterial(Color color)
     {
         return new StandardMaterial3D { AlbedoColor = color, Roughness = 1.0f, Metallic = 0f };
@@ -65,9 +91,14 @@ public static class DungeonBuilder
         root.AddChild(new MeshInstance3D { Mesh = mesh, MaterialOverride = material, Position = pos });
     }
 
-    private static void AddWall(Node3D root, Mesh mesh, Material material, Shape3D shape, Vector3 pos)
+    private static void AddWall(Node3D root, Mesh mesh, Material material, Shape3D shape, Vector3 pos, string? nodeName = null)
     {
         var wall = new Node3D { Position = pos };
+        if (!string.IsNullOrWhiteSpace(nodeName))
+        {
+            wall.Name = nodeName;
+        }
+
         wall.AddChild(new MeshInstance3D { Mesh = mesh, MaterialOverride = material });
         var body = new StaticBody3D();
         body.AddChild(new CollisionShape3D { Shape = shape });
@@ -77,10 +108,17 @@ public static class DungeonBuilder
 
     private static void AddExitMarker(Node3D root, Vector3 pos, Material material)
     {
-        AddDoorPart(root, material, new Vector3(0.18f, 2.4f, 0.18f), pos + new Vector3(-0.62f, 1.2f, 0f));
-        AddDoorPart(root, material, new Vector3(0.18f, 2.4f, 0.18f), pos + new Vector3(0.62f, 1.2f, 0f));
-        AddDoorPart(root, material, new Vector3(1.35f, 0.18f, 0.18f), pos + new Vector3(0f, 2.35f, 0f));
-        AddDoorPart(root, material, new Vector3(1.1f, 2.0f, 0.06f), pos + new Vector3(0f, 1.0f, -0.02f));
+        AddDoorPart(root, material, new Vector3(0.44f, 4.8f, 0.34f), pos + new Vector3(-1.24f, 2.4f, 0.08f));
+        AddDoorPart(root, material, new Vector3(0.44f, 4.8f, 0.34f), pos + new Vector3(1.24f, 2.4f, 0.08f));
+        AddDoorPart(root, material, new Vector3(2.84f, 0.44f, 0.34f), pos + new Vector3(0f, 4.68f, 0.08f));
+        AddExitPortalPanel(root, pos + new Vector3(0f, 1.98f, -0.06f), new Vector2(2.16f, 4.04f));
+    }
+
+    private static void AddExitPortalPanel(Node3D root, Vector3 position, Vector2 size)
+    {
+        var panel = PortalVisualFactory.Create(size);
+        panel.Position = position;
+        root.AddChild(panel);
     }
 
     private static void AddSaveMarker(Node3D root, Vector3 pos, Material material)
@@ -123,7 +161,7 @@ public static class DungeonBuilder
 
     private static void AddWallLamp(Node3D root, Material lampMaterial, Vector2I grid, Vector3 normalOffset)
     {
-        var basePos = DungeonGenerator.GridToWorld(grid.X, grid.Y, TileSize) + new Vector3(0f, 2.2f, 0f) + normalOffset;
+        var basePos = DungeonGenerator.GridToWorld(grid.X, grid.Y, DungeonMetrics.TileSize) + new Vector3(0f, 2.2f, 0f) + normalOffset;
         AddDoorPart(root, lampMaterial, new Vector3(0.22f, 0.34f, 0.22f), basePos);
         var light = new OmniLight3D
         {

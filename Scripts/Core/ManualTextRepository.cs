@@ -128,9 +128,9 @@ public static class ManualTextRepository
             {
                 return File.ReadAllText(path, Encoding.UTF8);
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                GameLog.Error($"Impossibile leggere il manuale esterno {path}: {ex.Message}");
             }
         }
 

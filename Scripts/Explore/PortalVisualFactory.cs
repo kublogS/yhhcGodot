@@ -20,7 +20,7 @@ public static class PortalVisualFactory
 
     private const string ShaderCode = """
 shader_type spatial;
-render_mode unshaded, cull_disabled, blend_mix, depth_draw_alpha_prepass;
+render_mode unshaded, cull_disabled, blend_mix, depth_prepass_alpha;
 
 uniform vec4 core_color : source_color = vec4(0.45, 0.62, 0.73, 1.0);
 uniform vec4 mist_color : source_color = vec4(0.82, 0.93, 0.98, 1.0);

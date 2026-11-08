@@ -5,7 +5,7 @@ public static partial class Inventory
 {
     public static string LoadItemDescription(string itemId)
     {
-        return Database.Instance.GetItemDescription(itemId);
+        return Database.GetItemDescriptionSafe(itemId);
     }
 
     private static void EnsurePlayerInventory(CharacterModel player)

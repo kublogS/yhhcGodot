@@ -9,19 +9,15 @@ public partial class SceneRouter : Node
         Instance = this;
     }
 
-    public void GoToMainMenu() => Change("res://Scenes/MainMenu.tscn");
-    public void GoToSavesMenu() => Change("res://Scenes/SavesMenu.tscn");
-    public void GoToNameEntry() => Change("res://Scenes/NameEntry.tscn");
-    public void GoToExplore() => Change("res://Scenes/Explore.tscn");
-    public void GoToBattle() => Change("res://Scenes/Battle.tscn");
-    public void GoToReward() => Change("res://Scenes/Reward.tscn");
+    public void GoToMainMenu() => Navigate(SceneRoute.MainMenu);
+    public void GoToSavesMenu() => Navigate(SceneRoute.SavesMenu);
+    public void GoToNameEntry() => Navigate(SceneRoute.NameEntry);
+    public void GoToExplore() => Navigate(SceneRoute.Explore);
+    public void GoToBattle() => Navigate(SceneRoute.Battle);
+    public void GoToReward() => Navigate(SceneRoute.Reward);
 
-    private void Change(string scenePath)
+    public void Navigate(SceneRoute route)
     {
-        var err = GetTree().ChangeSceneToFile(scenePath);
-        if (err != Error.Ok)
-        {
-            GD.PrintErr($"Cambio scena fallito: {scenePath} ({err})");
-        }
+        SceneRouteNavigator.ChangeScene(route, GetTree());
     }
 }

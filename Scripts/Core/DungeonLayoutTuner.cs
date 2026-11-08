@@ -120,7 +120,7 @@ public static class DungeonLayoutTuner
 
     private static Vector3 SnapToNearestWalkable(DungeonData dungeon, Vector3 world)
     {
-        var grid = DungeonGenerator.WorldToGrid(world, DungeonBuilder.TileSize);
+        var grid = DungeonGenerator.WorldToGrid(world, DungeonMetrics.TileSize);
         if (dungeon.IsWalkable(grid.X, grid.Y))
         {
             return world;
@@ -139,7 +139,7 @@ public static class DungeonLayoutTuner
                         continue;
                     }
 
-                    var snapped = DungeonGenerator.GridToWorld(gx, gy, DungeonBuilder.TileSize);
+                    var snapped = DungeonGenerator.GridToWorld(gx, gy, DungeonMetrics.TileSize);
                     return new Vector3(snapped.X, world.Y, snapped.Z);
                 }
             }
@@ -151,7 +151,7 @@ public static class DungeonLayoutTuner
     private static bool IsWalkable(int[,] grid, int x, int y)
     {
         var tile = (TileType)grid[y, x];
-        return tile is TileType.Floor or TileType.Doorway or TileType.Threshold or TileType.Exit or TileType.Breakable or TileType.Save;
+        return DungeonWalkabilityPolicy.IsWalkable(tile);
     }
 
     private static bool IsWall(int[,] grid, int x, int y)
